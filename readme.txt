@@ -4,28 +4,30 @@ Tags: order notification, order alert, woocommerce notification
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 WC requires at least: 7.0
 WC tested up to: 9.3
 
-Real-time new order notification with sound alert, popup, and auto-refresh table for WooCommerce store owners.
+Real-time new order notification with sound alert, popup, dashboard stats, status filtering, and auto-refresh table for WooCommerce store owners.
 
 == Description ==
 
-**Instant Order Notification for WooCommerce – Get Audio Alerts for New Orders helps store owners instantly know when a new order arrives — without constantly refreshing or checking the dashboard.
+Instant Order Notification for WooCommerce – Get Audio Alerts for New Orders helps store owners instantly know when a new order arrives — without constantly refreshing or checking the dashboard.
 
 As soon as a new order is placed, the plugin instantly alerts you with a popup notification and sound so you never miss an order.
 
 What happens when a new order arrives?
--Shows a clean popup notification with Order ID, Customer Name, and Order Total
--Plays an instant audio notification
--Desktop notification support for real-time alerts
--Automatically refreshes the recent orders table
--Includes sound mute/unmute control with a visual reminder
--Choose from multiple ringtone options
--Adjustable order check speed (Fast, Normal, Slow)
+- Shows a clean popup notification with Order ID, Customer Name, and Order Total
+- Plays an instant audio notification
+- Desktop notification support for real-time alerts
+- Automatically refreshes the recent orders table
+- Displays dashboard summary (Today Orders, Processing, Completed, Cancelled)
+- Filter orders by status (Processing, Completed, Pending, etc.)
+- Includes sound mute/unmute control with a visual reminder
+- Choose from multiple ringtone options
+- Adjustable order check speed (Fast, Normal, Slow)
 
 Perfect for busy WooCommerce store owners who want to respond to orders quickly without manually monitoring the dashboard.
 
@@ -35,6 +37,8 @@ Perfect for busy WooCommerce store owners who want to respond to orders quickly 
 - 3 built-in notification ringtones
 - Clean popup with order details
 - Auto-refresh recent orders table
+- Dashboard summary cards (Today, Processing, Completed, Cancelled)
+- Status-wise order filtering (Processing, Pending, Completed, etc.)
 - Orders table with pagination support
 - Sound toggle with animated reminder when muted
 - Check speed options: Fast (1 sec), Normal (2 sec), Slow (6 sec)
@@ -81,6 +85,30 @@ Yes. You will still receive the notification even if you are working in another 
 
 
 == Changelog ==
+
+= 1.3.2 =
+* Added popup queue for multiple orders
+* Fixed multiple modal issue
+* Disabled outside click to close popup
+* Auto show next popup after close
+* Fixed JS error (data undefined)
+* Improved sound handling with localStorage
+* Better audio compatibility
+* Minor bug fixes & performance improvements
+
+= 1.3.1 =
+* NEW: Added feedback form on plugin deactivation to collect user insights
+* NEW: Added support button for quick help and user assistance
+* UPDATED: Improved UI design for better user experience
+* UPDATED: Updated plugin images and visual assets
+* Minor bug fixes and performance improvements
+
+= 1.3.0 =
+* NEW: Dashboard summary cards (Today Orders, Processing, Completed, Cancelled)
+* NEW: Status-wise filtering for orders table
+* NEW: Improved UI with better card design and layout
+* Improved AJAX performance for order loading
+* Minor bug fixes and UI enhancements
 
 = 1.2.0 =
 * NEW: Desktop browser notification for new WooCommerce orders
