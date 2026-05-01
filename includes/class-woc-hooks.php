@@ -23,6 +23,8 @@ class WPC_WCON_Hooks
         add_action('wp_ajax_wpc_delete_order', [$this, 'wpc_ajax_delete_order']);
 
         add_action('admin_head', [$this, 'wpc_global_bell_icon_customization']);
+
+        add_action('wp_ajax_wpc_get_dashboard_stats', [$this, 'wpc_get_dashboard_stats']);
     }
 
     /**
@@ -234,6 +236,13 @@ class WPC_WCON_Hooks
         $page     = max(1, isset($_POST['page'])     ? absint($_POST['page'])     : 1);
         $per_page = max(1, isset($_POST['per_page']) ? absint($_POST['per_page']) : 10);
         $offset   = ($page - 1) * $per_page;
+        $status = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : '';
+
+        $where = "1=1";
+
+        if (!empty($status)) {
+            $where .= $wpdb->prepare(" AND status = %s", $status);
+        }
 
         // Get last changed time to invalid cache when needed
         $last_changed = wp_cache_get('wpc_orders_last_changed', 'wpc_order_notification');
@@ -242,16 +251,17 @@ class WPC_WCON_Hooks
             wp_cache_set('wpc_orders_last_changed', $last_changed, 'wpc_order_notification');
         }
 
-        $cache_key_count = 'wpc_orders_count_' . md5($last_changed);
+        $cache_key_count = 'wpc_orders_count_' . md5($last_changed . $status);
         $total           = wp_cache_get($cache_key_count, 'wpc_order_notification');
 
         if (false === $total) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-            $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
+            // $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
+            $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE $where");
             wp_cache_set($cache_key_count, $total, 'wpc_order_notification');
         }
 
-        $cache_key_items = 'wpc_orders_list_' . md5($last_changed . $page . $per_page);
+        $cache_key_items = 'wpc_orders_list_' . md5($last_changed . $page . $per_page . $status);
         $orders          = wp_cache_get($cache_key_items, 'wpc_order_notification');
 
         if (false === $orders) {
@@ -259,7 +269,7 @@ class WPC_WCON_Hooks
             $orders = $wpdb->get_results(
                 $wpdb->prepare(
                     // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                    "SELECT * FROM {$table} ORDER BY id DESC LIMIT %d OFFSET %d",
+                    "SELECT * FROM {$table} WHERE $where ORDER BY id DESC LIMIT %d OFFSET %d",
                     $per_page,
                     $offset
                 )
@@ -325,6 +335,41 @@ class WPC_WCON_Hooks
 
         wp_send_json_error(['message' => 'Failed to remove order']);
     }
+
+    public function wpc_get_dashboard_stats()
+{
+    check_ajax_referer('wpc_nonce', 'nonce');
+
+    global $wpdb;
+    $table = $wpdb->prefix . 'woc_orders';
+
+    $today = date('Y-m-d');
+
+    // Today orders
+    $today_orders = $wpdb->get_var(
+        $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE DATE(created_at) = %s", $today)
+    );
+
+    // Status wise count (today only)
+    $processing = $wpdb->get_var(
+        $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s AND DATE(created_at) = %s", 'processing', $today)
+    );
+
+    $completed = $wpdb->get_var(
+        $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s AND DATE(created_at) = %s", 'completed', $today)
+    );
+
+    $cancelled = $wpdb->get_var(
+        $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s AND DATE(created_at) = %s", 'cancelled', $today)
+    );
+
+    wp_send_json_success([
+        'today'      => (int) $today_orders,
+        'processing' => (int) $processing,
+        'completed'  => (int) $completed,
+        'cancelled'  => (int) $cancelled,
+    ]);
+}
 }
 
 // Initialize

@@ -5,7 +5,7 @@
  * Plugin Name: Instant Order Notification for WooCommerce – Get Audio Alert on new Orders
  * Plugin URI:  https://thewpcraft.com/instant-order-notifier-woc
  * Description: Real-time order notification with sound alert, popup, and auto-refresh table for WooCommerce stores.
- * Version:     1.2.0
+ * Version:     1.3.2
  * Author:      TheWpCraft
  * Author URI:  https://thewpcraft.com/
  * License:     GPL-2.0-or-later
@@ -36,7 +36,6 @@ function wpc_order_notification_settings_link($links)
 
     return $links;
 }
-
 
 
 // DB

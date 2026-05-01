@@ -429,3 +429,31 @@ input[type="radio"]:checked::before {
 .form-select:focus {
   box-shadow: none !important;
 }
+
+
+
+.wpc-dashboard .card {
+    border-radius: 10px;
+    border: none;
+    transition: 0.3s;
+}
+
+.wpc-dashboard .card:hover {
+    transform: translateY(-3px);
+}
+
+.wpc-dashboard .col-md-3:nth-child(1) .card {
+    background: #eef2ff;
+}
+
+.wpc-dashboard .col-md-3:nth-child(2) .card {
+    background: #d1e7dd;
+}
+
+.wpc-dashboard .col-md-3:nth-child(3) .card {
+    background: #f8d7da;
+}
+
+.wpc-dashboard .col-md-3:nth-child(4) .card {
+    background: #d4edda;
+}

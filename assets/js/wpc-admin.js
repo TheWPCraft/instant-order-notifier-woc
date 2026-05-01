@@ -11,14 +11,22 @@ jQuery(document).ready(function ($) {
   const unmuteReminder = $("#wpc-unmute-reminder");
   const fullOverlay = $("#wpc-full-unmute-overlay");
 
+  const savedSound = localStorage.getItem("wpc_sound_enabled");
+
+  let currentStatus = "";
   let lastSeenId = parseInt(wpcData.last_seen_order_id) || 0;
   let currentNewOrderId = 0;
   let repeatInterval = null;
   let currentPage = 1;
   let perPage = 10;
   let isPaused = false;
-  let isSoundEnabled = false; // Default: muted → overlay should show
+  let isSoundEnabled = false;
   let isAudioUnlocked = false;
+
+  // Load saved sound preference
+  if (savedSound === "1") {
+    isSoundEnabled = true;
+  }
 
   let savedPerPage = localStorage.getItem("wpc_per_page");
   if (savedPerPage) {
@@ -37,17 +45,16 @@ jQuery(document).ready(function ($) {
     notification_enabled: "1",
     ringtone: "1",
     check_speed: "normal",
+    desktop_notifications_enabled: "0",
   };
 
   const tip = $("#desktop-notification-tip");
   const checkbox = $("#desktop_notifications_enabled");
 
-  // Initial state check
   if (checkbox.is(":checked")) {
     tip.show();
   }
 
-  // On change
   checkbox.on("change", function () {
     if ($(this).is(":checked")) {
       tip.slideDown();
@@ -61,9 +68,7 @@ jQuery(document).ready(function ($) {
     settings.desktop_notifications_enabled === "1" &&
     Notification.permission !== "granted"
   ) {
-    Notification.requestPermission().then(function (permission) {
-      console.log("Permission status:", permission);
-    });
+    Notification.requestPermission();
   }
 
   const statusColors = {
@@ -79,8 +84,14 @@ jQuery(document).ready(function ($) {
   const isNotificationPage = $("#wpc-orders-table").length > 0;
   const isSettingsPage = $(".play-sound").length > 0;
 
+  $("#wpc-status-filter").on("change", function () {
+    currentStatus = $(this).val();
+    currentPage = 1;
+    refreshTable(1, true);
+  });
+
   // ────────────────────────────────────────────────
-  // Overlay control
+  // Overlay & Reminder Functions
   // ────────────────────────────────────────────────
 
   function showFullUnmuteOverlay() {
@@ -93,10 +104,6 @@ jQuery(document).ready(function ($) {
     fullOverlay.removeClass("visible");
   }
 
-  // ────────────────────────────────────────────────
-  // Reminder text animation
-  // ────────────────────────────────────────────────
-
   function showUnmuteReminder() {
     if (settings.notification_enabled !== "1") return;
     unmuteReminder.css({
@@ -104,9 +111,7 @@ jQuery(document).ready(function ($) {
       transform: "translateY(0) scale(1)",
       display: "inline-block",
     });
-    unmuteReminder.addClass(
-      "animate__animated animate__pulse animate__infinite",
-    );
+    unmuteReminder.addClass("animate__animated animate__pulse animate__infinite");
   }
 
   function hideUnmuteReminder() {
@@ -114,9 +119,7 @@ jQuery(document).ready(function ($) {
       opacity: "0",
       transform: "translateY(10px) scale(0.9)",
     });
-    unmuteReminder.removeClass(
-      "animate__animated animate__pulse animate__infinite",
-    );
+    unmuteReminder.removeClass("animate__animated animate__pulse animate__infinite");
     setTimeout(() => {
       unmuteReminder.css("display", "none");
     }, 400);
@@ -131,378 +134,75 @@ jQuery(document).ready(function ($) {
   }
 
   // ────────────────────────────────────────────────
-  // Auto refresh & new order detection
+  // Audio Unlock
   // ────────────────────────────────────────────────
-
-  if (isNotificationPage) {
-    if (settings.notification_enabled !== "1") {
-      isSoundEnabled = false;
-      isPaused = true;
-      soundBtn
-        .html('<i class="bi bi-volume-mute-fill fs-5"></i>')
-        .attr("title", "Notifications Disabled");
-      pauseBtn
-        .html('<i class="bi bi-play-fill fs-5"></i>')
-        .attr("title", "Paused");
-    }
-
-    let checkInterval = 2000;
-    if (settings.check_speed === "fast") checkInterval = 1000;
-    else if (settings.check_speed === "slow") checkInterval = 6000;
-
-    window.wpcAutoRefreshInterval = setInterval(function () {
-      if (!isPaused && settings.notification_enabled === "1") {
-        refreshTable(currentPage, false);
-
-        $.post(wpcData.ajax_url, {
-          action: "wpc_check_new_order",
-          nonce: wpcData.nonce,
-        })
-          .done(function (response) {
-            if (
-              response.success &&
-              response.data &&
-              response.data.id > lastSeenId
-            ) {
-              if (currentNewOrderId !== response.data.id) {
-                currentNewOrderId = response.data.id;
-
-                popupText.html(`
-                                Order #${response.data.id}<br>
-                                <strong>${response.data.name}</strong>
-                            `);
-                const popupModal = new bootstrap.Modal(
-                  document.getElementById("wpc-popup-modal"),
-                );
-                popupModal.show();
-
-                // Only show desktop notifications if both notification_enabled and desktop_notifications_enabled
-                if (
-                  settings.notification_enabled === "1" &&
-                  settings.desktop_notifications_enabled === "1" &&
-                  Notification.permission === "granted"
-                ) {
-                  console.log(
-                    "Desktop Notification Triggered for Order:",
-                    response.data.id,
-                  );
-                  new Notification(`New Order #${response.data.id}`, {
-                    body: `Customer: ${response.data.name}\nTotal: ${response.data.total || "₹0"}`,
-                    // icon: wpcData.icon || wpcData.plugin_url + '/assets/images/order-icon.png'
-                  });
-                }
-
-                if (isSoundEnabled && isAudioUnlocked) {
-                  audio.src =
-                    wpcData.audio_urls[settings.ringtone] || wpcData.audio;
-                  audio.currentTime = 0;
-                  audio.play().catch(() => { });
-
-                  if (repeatInterval) clearInterval(repeatInterval);
-                  repeatInterval = setInterval(() => {
-                    audio.currentTime = 0;
-                    audio.play().catch(() => { });
-                  }, 4000);
-                }
-
-                updateUnmuteReminder();
-                refreshTable(1, false);
-              }
-            }
-          })
-          .fail(function () {
-            console.log("New order check failed");
-          });
-      }
-    }, checkInterval);
-  }
-
-  // ────────────────────────────────────────────────
-  // Sound button logic – controls overlay + reminder visibility
-  // ────────────────────────────────────────────────
-
-  if (soundBtn.length) {
-    soundBtn.on("click", function () {
-      if (settings.notification_enabled !== "1") {
-        alert("Please enable notifications in Settings first!");
-        return;
-      }
-
-      unlockAudio();
-
-      isSoundEnabled = !isSoundEnabled;
-
-      if (isSoundEnabled) {
-        soundBtn
-          .html('<i class="bi bi-volume-up-fill fs-5"></i>')
-          .attr("title", "Sound On");
-        hideUnmuteReminder();
-        hideFullUnmuteOverlay();
-        audio.currentTime = 0;
-        audio.play().catch(() => { });
-      } else {
-        // Muted → show reminder text + overlay
-        soundBtn
-          .html('<i class="bi bi-volume-mute-fill fs-5"></i>')
-          .attr("title", "Sound Off");
-        showUnmuteReminder();
-        showFullUnmuteOverlay();
-        if (repeatInterval) {
-          clearInterval(repeatInterval);
-          repeatInterval = null;
-        }
-      }
-    });
-  }
-
-  // Initial state
-  if (!isSoundEnabled && settings.notification_enabled === "1") {
-    showFullUnmuteOverlay();
-    showUnmuteReminder();
-  }
-
-  // ────────────────────────────────────────────────
-  // Rest of your existing code (unchanged)
-  // ────────────────────────────────────────────────
-
-  if (isSettingsPage) {
-    $(".play-sound").on("click", function () {
-      const soundNum = $(this).data("sound");
-      const soundUrl = wpcData.audio_urls[soundNum];
-      if (soundUrl) {
-        const previewAudio = new Audio(soundUrl);
-        previewAudio.volume = 0.7;
-        previewAudio
-          .play()
-          .catch((e) => console.log("Audio preview failed:", e));
-      }
-    });
-  }
-
-  function buildTableRows(orders) {
-    if (orders.length === 0) {
-      tableBody.html(
-        '<tr><td colspan="6" class="text-center py-2 text-muted">No orders yet</td></tr>',
-      );
-      return;
-    }
-
-    let rows = "";
-    orders.forEach(function (o) {
-      const statusInfo = statusColors[o.status] || {
-        bg: "#6c757d",
-        text: "#ffffff",
-      };
-      const statusText =
-        o.status.charAt(0).toUpperCase() + o.status.slice(1).replace("-", " ");
-
-      rows += '<tr data-order-id="' + o.order_id + '">';
-      rows += "<td><strong>#" + o.order_id + "</strong></td>";
-      rows += "<td>" + o.customer_name + "</td>";
-      rows += "<td><strong>" + o.total + "</strong></td>";
-      rows +=
-        '<td><span class="status-badge status-' +
-        o.status +
-        '" style="background:' +
-        statusInfo.bg +
-        " !important; color:" +
-        statusInfo.text +
-        ' !important; padding:4px 8px; border-radius:4px; font-size:0.85em;">' +
-        statusText +
-        "</span></td>";
-      rows += "<td>" + o.created_at + "</td>";
-      rows +=
-        '<td><a href="' +
-        o.edit_url +
-        '" class="btn view" style="margin-right:5px;" target="_blank"><i class="bi bi-eye me-1"></i> View</a><button class="btn wpc-mark-read" data-id="' +
-        o.order_id +
-        '"><i class="bi bi-check2-all me-1"></i> Mark Read</button></td>';
-      rows += "</tr>";
-    });
-
-    tableBody.html(rows);
-    setupMarkReadButtons();
-
-    reloadBtn
-      .find("i")
-      .removeClass("bi-arrow-repeat")
-      .addClass("bi-arrow-clockwise");
-  }
-
-  function setupMarkReadButtons() {
-    $(".wpc-mark-read")
-      .off("click")
-      .on("click", function () {
-        const btn = $(this);
-        const orderId = btn.data("id");
-        const row = btn.closest("tr");
-
-        btn
-          .prop("disabled", true)
-          .html('<i class="bi bi-hourglass-split me-1"></i> Removing...');
-
-        $.post(wpcData.ajax_url, {
-          action: "wpc_delete_order",
-          order_id: orderId,
-          nonce: wpcData.nonce,
-        })
-          .done(function (response) {
-            if (response.success) {
-              row.fadeOut(400, function () {
-                row.remove();
-              });
-            } else {
-              btn
-                .prop("disabled", false)
-                .html('<i class="bi bi-check2-all me-1"></i> Mark Read');
-            }
-          })
-          .fail(function () {
-            btn
-              .prop("disabled", false)
-              .html('<i class="bi bi-check2-all me-1"></i> Mark Read');
-          });
-      });
-  }
-
-  function refreshTable(page = 1, showLoading = false) {
-    currentPage = page;
-
-    if (showLoading && tableBody.length) {
-      tableBody.html(`
-                <tr>
-                    <td colspan="6" class="text-center py-3">
-                        <div class="spinner-border text-theme" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-3 mb-0 text-muted">Loading orders...</p>
-                    </td>
-                </tr>
-            `);
-    }
-
-    $.post(wpcData.ajax_url, {
-      action: "wpc_get_orders_json",
-      page: page,
-      nonce: wpcData.nonce,
-      per_page: perPage,
-    })
-      .done(function (response) {
-        if (response.success && isNotificationPage) {
-          buildTableRows(response.data.orders);
-          updatePagination(response.data.total);
-        } else if (showLoading) {
-          tableBody.html(
-            '<tr><td colspan="6" class="text-center py-5 text-danger">Error loading orders</td></tr>',
-          );
-        }
-      })
-      .fail(function () {
-        if (showLoading) {
-          tableBody.html(
-            '<tr><td colspan="6" class="text-center py-5 text-danger">Server error</td></tr>',
-          );
-        }
-      });
-  }
-
-  function updatePagination(total) {
-    const totalPages = Math.ceil(total / perPage);
-
-    if (totalPages <= 1) {
-      $("#wpc-pagination").hide();
-      return;
-    }
-
-    let pagination = '<nav><ul class="pagination justify-content-center">';
-
-    // Previous Button
-    pagination += `
-        <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
-            <a class="page-link" href="#" data-page="${currentPage - 1}"><i class="bi bi-arrow-left"></i></a>
-        </li>
-    `;
-
-    for (let i = 1; i <= totalPages; i++) {
-      pagination += `
-            <li class="page-item ${i === currentPage ? "active" : ""}">
-                <a class="page-link" href="#" data-page="${i}">${i}</a>
-            </li>
-        `;
-    }
-
-    // Next Button
-    pagination += `
-        <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
-            <a class="page-link" href="#" data-page="${currentPage + 1}"><i class="bi bi-arrow-right"></i></a>
-        </li>
-    `;
-
-    pagination += "</ul></nav>";
-
-    $("#wpc-pagination").html(pagination).show();
-
-    $("#wpc-pagination .page-link").on("click", function (e) {
-      e.preventDefault();
-      const page = $(this).data("page");
-
-      if (page >= 1 && page <= totalPages) {
-        refreshTable(page, true);
-      }
-    });
-  }
-
-  if (isNotificationPage) {
-    refreshTable(1, false);
-  }
-
-  if (reloadBtn.length) {
-    reloadBtn.on("click", function () {
-      unlockAudio();
-      const icon = reloadBtn.find("i");
-      icon.removeClass("bi-arrow-clockwise").addClass("bi-arrow-repeat");
-      refreshTable(currentPage, true);
-      setTimeout(
-        () =>
-          icon.removeClass("bi-arrow-repeat").addClass("bi-arrow-clockwise"),
-        1500,
-      );
-    });
-  }
-
-  if (pauseBtn.length) {
-    pauseBtn.on("click", function () {
-      isPaused = !isPaused;
-      if (isPaused) {
-        pauseBtn
-          .html('<i class="bi bi-play-fill fs-5"></i>')
-          .attr("title", "Resume");
-      } else {
-        pauseBtn
-          .html('<i class="bi bi-pause-fill fs-5"></i>')
-          .attr("title", "Pause");
-      }
-    });
-  }
 
   function unlockAudio() {
     if (!isAudioUnlocked && isNotificationPage) {
-      audio
-        .play()
-        .catch(() => { })
-        .then(() => {
-          audio.pause();
-          audio.currentTime = 0;
-          isAudioUnlocked = true;
-        });
+      audio.play().catch(() => {}).then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        isAudioUnlocked = true;
+      });
     }
   }
 
+  // Initial unlock if sound was enabled
+  if (isSoundEnabled) {
+    setTimeout(() => {
+      unlockAudio();
+    }, 500);
+  }
+
+  // ────────────────────────────────────────────────
+  // Popup Management (Single Popup - Important Fix)
+  // ────────────────────────────────────────────────
+
+  let currentModalInstance = null;
+
+  function showNewOrderPopup(orderData) {
+    // Close any existing popup first
+    if (currentModalInstance) {
+      currentModalInstance.hide();
+      currentModalInstance = null;
+    }
+
+    popupText.html(`
+      Order #${orderData.id}<br>
+      <strong>${orderData.name}</strong>
+    `);
+
+    const modalEl = document.getElementById("wpc-popup-modal");
+    currentModalInstance = new bootstrap.Modal(modalEl, {
+      backdrop: "static",
+      keyboard: false,
+    });
+
+    currentModalInstance.show();
+
+    // Play sound only if enabled and unlocked
+    if (isSoundEnabled && isAudioUnlocked) {
+      audio.src = wpcData.audio_urls[settings.ringtone] || wpcData.audio;
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+
+      if (repeatInterval) clearInterval(repeatInterval);
+      repeatInterval = setInterval(() => {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }, 4000);
+    }
+
+    updateUnmuteReminder();
+  }
+
+  // Popup OK Button
   if (popupOk.length) {
     popupOk.on("click", function () {
-      const modalEl = document.getElementById("wpc-popup-modal");
-      const modalInstance = bootstrap.Modal.getInstance(modalEl);
-      if (modalInstance) modalInstance.hide();
+      if (currentModalInstance) {
+        currentModalInstance.hide();
+        currentModalInstance = null;
+      }
 
       if (repeatInterval) {
         clearInterval(repeatInterval);
@@ -520,6 +220,325 @@ jQuery(document).ready(function ($) {
     });
   }
 
+  // Close modal when hidden (cleanup)
+  $('#wpc-popup-modal').on('hidden.bs.modal', function () {
+    if (repeatInterval) {
+      clearInterval(repeatInterval);
+      repeatInterval = null;
+    }
+    currentModalInstance = null;
+  });
+
+  // ────────────────────────────────────────────────
+  // Auto Refresh & New Order Detection
+  // ────────────────────────────────────────────────
+
+  if (isNotificationPage) {
+    if (settings.notification_enabled !== "1") {
+      isSoundEnabled = false;
+      isPaused = true;
+      soundBtn.html('<i class="bi bi-volume-mute-fill fs-5"></i>').attr("title", "Notifications Disabled");
+      pauseBtn.html('<i class="bi bi-play-fill fs-5"></i>').attr("title", "Paused");
+    }
+
+    let checkInterval = 2000;
+    if (settings.check_speed === "fast") checkInterval = 1000;
+    else if (settings.check_speed === "slow") checkInterval = 6000;
+
+    window.wpcAutoRefreshInterval = setInterval(function () {
+      if (!isPaused && settings.notification_enabled === "1") {
+        refreshTable(currentPage, false);
+        loadDashboardStats();
+
+        $.post(wpcData.ajax_url, {
+          action: "wpc_check_new_order",
+          nonce: wpcData.nonce,
+        })
+          .done(function (response) {
+            if (
+              response.success &&
+              response.data &&
+              response.data.id > lastSeenId
+            ) {
+              if (currentNewOrderId !== response.data.id) {
+                currentNewOrderId = response.data.id;
+
+                // Show only one popup at a time
+                showNewOrderPopup(response.data);
+
+                // Desktop Notification
+                if (
+                  settings.notification_enabled === "1" &&
+                  settings.desktop_notifications_enabled === "1" &&
+                  Notification.permission === "granted"
+                ) {
+                  new Notification(`New Order #${response.data.id}`, {
+                    body: `Customer: ${response.data.name}\nTotal: ${response.data.total || "₹0"}`,
+                  });
+                }
+
+                refreshTable(1, false);
+              }
+            }
+          })
+          .fail(function () {
+            console.log("New order check failed");
+          });
+      }
+    }, checkInterval);
+  }
+
+  // ────────────────────────────────────────────────
+  // Sound Button Logic
+  // ────────────────────────────────────────────────
+
+  if (soundBtn.length) {
+    soundBtn.on("click", function () {
+      if (settings.notification_enabled !== "1") {
+        alert("Please enable notifications in Settings first!");
+        return;
+      }
+
+      unlockAudio();
+
+      isSoundEnabled = !isSoundEnabled;
+      localStorage.setItem("wpc_sound_enabled", isSoundEnabled ? "1" : "0");
+
+      if (isSoundEnabled) {
+        soundBtn.html('<i class="bi bi-volume-up-fill fs-5"></i>').attr("title", "Sound On");
+        hideUnmuteReminder();
+        hideFullUnmuteOverlay();
+
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      } else {
+        soundBtn.html('<i class="bi bi-volume-mute-fill fs-5"></i>').attr("title", "Sound Off");
+        showUnmuteReminder();
+        showFullUnmuteOverlay();
+
+        if (repeatInterval) {
+          clearInterval(repeatInterval);
+          repeatInterval = null;
+        }
+      }
+    });
+  }
+
+  // Initial Sound Button & Overlay State
+  if (settings.notification_enabled === "1") {
+    if (isSoundEnabled) {
+      soundBtn.html('<i class="bi bi-volume-up-fill fs-5"></i>').attr("title", "Sound On");
+      hideUnmuteReminder();
+      hideFullUnmuteOverlay();
+    } else {
+      soundBtn.html('<i class="bi bi-volume-mute-fill fs-5"></i>').attr("title", "Sound Off");
+      showFullUnmuteOverlay();
+      showUnmuteReminder();
+    }
+  }
+
+  // ────────────────────────────────────────────────
+  // Settings Page Sound Preview
+  // ────────────────────────────────────────────────
+
+  if (isSettingsPage) {
+    $(".play-sound").on("click", function () {
+      const soundNum = $(this).data("sound");
+      const soundUrl = wpcData.audio_urls[soundNum];
+      if (soundUrl) {
+        const previewAudio = new Audio(soundUrl);
+        previewAudio.volume = 0.7;
+        previewAudio.play().catch((e) => console.log("Audio preview failed:", e));
+      }
+    });
+  }
+
+  // ────────────────────────────────────────────────
+  // Table & Other Functions (unchanged)
+  // ────────────────────────────────────────────────
+
+  function buildTableRows(orders) {
+    if (orders.length === 0) {
+      tableBody.html('<tr><td colspan="6" class="text-center py-2 text-muted">No orders yet</td></tr>');
+      return;
+    }
+
+    let rows = "";
+    orders.forEach(function (o) {
+      const statusInfo = statusColors[o.status] || { bg: "#6c757d", text: "#ffffff" };
+      const statusText = o.status.charAt(0).toUpperCase() + o.status.slice(1).replace("-", " ");
+
+      rows += '<tr data-order-id="' + o.order_id + '">';
+      rows += "<td><strong>#" + o.order_id + "</strong></td>";
+      rows += "<td>" + o.customer_name + "</td>";
+      rows += "<td><strong>" + o.total + "</strong></td>";
+      rows += '<td><span class="status-badge status-' + o.status + '" style="background:' + statusInfo.bg + " !important; color:" + statusInfo.text + ' !important; padding:4px 8px; border-radius:4px; font-size:0.85em;">' + statusText + "</span></td>";
+      rows += "<td>" + o.created_at + "</td>";
+      rows += '<td><a href="' + o.edit_url + '" class="btn view" style="margin-right:5px;" target="_blank"><i class="bi bi-eye me-1"></i> View</a><button class="btn wpc-mark-read" data-id="' + o.order_id + '"><i class="bi bi-check2-all me-1"></i> Mark Read</button></td>';
+      rows += "</tr>";
+    });
+
+    tableBody.html(rows);
+    setupMarkReadButtons();
+
+    reloadBtn.find("i").removeClass("bi-arrow-repeat").addClass("bi-arrow-clockwise");
+  }
+
+  function loadDashboardStats() {
+    $.post(wpcData.ajax_url, {
+      action: "wpc_get_dashboard_stats",
+      nonce: wpcData.nonce,
+    })
+      .done(function (response) {
+        if (response.success) {
+          $("#wpc-today-orders").text(response.data.today);
+          $("#wpc-processing-orders").text(response.data.processing);
+          $("#wpc-completed-orders").text(response.data.completed);
+          $("#wpc-cancelled-orders").text(response.data.cancelled);
+        }
+      })
+      .fail(function () {
+        console.log("Dashboard load failed");
+      });
+  }
+
+  function setupMarkReadButtons() {
+    $(".wpc-mark-read")
+      .off("click")
+      .on("click", function () {
+        const btn = $(this);
+        const orderId = btn.data("id");
+        const row = btn.closest("tr");
+
+        btn.prop("disabled", true).html('<i class="bi bi-hourglass-split me-1"></i> Removing...');
+
+        $.post(wpcData.ajax_url, {
+          action: "wpc_delete_order",
+          order_id: orderId,
+          nonce: wpcData.nonce,
+        })
+          .done(function (response) {
+            if (response.success) {
+              row.fadeOut(400, function () {
+                row.remove();
+              });
+            } else {
+              btn.prop("disabled", false).html('<i class="bi bi-check2-all me-1"></i> Mark Read');
+            }
+          })
+          .fail(function () {
+            btn.prop("disabled", false).html('<i class="bi bi-check2-all me-1"></i> Mark Read');
+          });
+      });
+  }
+
+  function refreshTable(page = 1, showLoading = false) {
+    currentPage = page;
+
+    if (showLoading && tableBody.length) {
+      tableBody.html(`
+        <tr>
+          <td colspan="6" class="text-center py-3">
+            <div class="spinner-border text-theme" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 mb-0 text-muted">Loading orders...</p>
+          </td>
+        </tr>
+      `);
+    }
+
+    $.post(wpcData.ajax_url, {
+      action: "wpc_get_orders_json",
+      page: page,
+      nonce: wpcData.nonce,
+      per_page: perPage,
+      status: currentStatus,
+    })
+      .done(function (response) {
+        if (response.success && isNotificationPage) {
+          buildTableRows(response.data.orders);
+          updatePagination(response.data.total);
+        } else if (showLoading) {
+          tableBody.html('<tr><td colspan="6" class="text-center py-5 text-danger">Error loading orders</td></tr>');
+        }
+      })
+      .fail(function () {
+        if (showLoading) {
+          tableBody.html('<tr><td colspan="6" class="text-center py-5 text-danger">Server error</td></tr>');
+        }
+      });
+  }
+
+  function updatePagination(total) {
+    const totalPages = Math.ceil(total / perPage);
+
+    if (totalPages <= 1) {
+      $("#wpc-pagination").hide();
+      return;
+    }
+
+    let pagination = '<nav><ul class="pagination justify-content-center">';
+
+    pagination += `
+      <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+        <a class="page-link" href="#" data-page="${currentPage - 1}"><i class="bi bi-arrow-left"></i></a>
+      </li>
+    `;
+
+    for (let i = 1; i <= totalPages; i++) {
+      pagination += `
+        <li class="page-item ${i === currentPage ? "active" : ""}">
+          <a class="page-link" href="#" data-page="${i}">${i}</a>
+        </li>
+      `;
+    }
+
+    pagination += `
+      <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+        <a class="page-link" href="#" data-page="${currentPage + 1}"><i class="bi bi-arrow-right"></i></a>
+      </li>
+    `;
+
+    pagination += "</ul></nav>";
+
+    $("#wpc-pagination").html(pagination).show();
+
+    $("#wpc-pagination .page-link").on("click", function (e) {
+      e.preventDefault();
+      const page = $(this).data("page");
+      if (page >= 1 && page <= totalPages) {
+        refreshTable(page, true);
+      }
+    });
+  }
+
+  if (isNotificationPage) {
+    refreshTable(1, false);
+    loadDashboardStats();
+  }
+
+  if (reloadBtn.length) {
+    reloadBtn.on("click", function () {
+      unlockAudio();
+      const icon = reloadBtn.find("i");
+      icon.removeClass("bi-arrow-clockwise").addClass("bi-arrow-repeat");
+      refreshTable(currentPage, true);
+      setTimeout(() => icon.removeClass("bi-arrow-repeat").addClass("bi-arrow-clockwise"), 1500);
+    });
+  }
+
+  if (pauseBtn.length) {
+    pauseBtn.on("click", function () {
+      isPaused = !isPaused;
+      if (isPaused) {
+        pauseBtn.html('<i class="bi bi-play-fill fs-5"></i>').attr("title", "Resume");
+      } else {
+        pauseBtn.html('<i class="bi bi-pause-fill fs-5"></i>').attr("title", "Pause");
+      }
+    });
+  }
+
   $(window).on("beforeunload", function () {
     if (window.wpcAutoRefreshInterval) {
       clearInterval(window.wpcAutoRefreshInterval);
@@ -529,7 +548,18 @@ jQuery(document).ready(function ($) {
   $("#toplevel_page_woc-order-notification .wp-menu-image.dashicons-bell")
     .parent()
     .addClass("wpc-bell-with-extra-class");
-  $("#toplevel_page_woc-order-notification .wp-menu-image").addClass(
-    "wpc-custom-bell-icon",
-  );
+  $("#toplevel_page_woc-order-notification .wp-menu-image").addClass("wpc-custom-bell-icon");
+
+  // Dashboard card click filter
+  $(".wpc-card-filter").on("click", function () {
+    const status = $(this).data("status");
+    currentStatus = status || "";
+    $("#wpc-status-filter").val(currentStatus);
+    currentPage = 1;
+    refreshTable(1, true);
+
+    $("html, body").animate({
+      scrollTop: $("#wpc-orders-table").offset().top - 100,
+    }, 400);
+  });
 });

@@ -37,6 +37,49 @@ if (!defined('ABSPATH')) exit;
                         </div>
                     </div>
                 </div>
+                <!-- Dashboard Summary -->
+                <div class="wpc-dashboard mb-3">
+                    <div class="row g-2">
+
+                        <div class="col-md-3">
+                            <div class="card text-center shadow-sm">
+                                <div class="card-body py-2">
+                                    <h6 class="mb-1">Today Orders</h6>
+                                    <h4 id="wpc-today-orders">0</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card text-center shadow-sm">
+                                <div class="card-body py-2">
+                                    <h6 class="mb-1">Processing</h6>
+                                    <h4 id="wpc-processing-orders">0</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                    
+                        <div class="col-md-3">
+                            <div class="card text-center shadow-sm">
+                                <div class="card-body py-2">
+                                    <h6 class="mb-1">Cancelled</h6>
+                                    <h4 id="wpc-cancelled-orders">0</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card text-center shadow-sm">
+                                <div class="card-body py-2">
+                                    <h6 class="mb-1">Completed</h6>
+                                    <h4 id="wpc-completed-orders">0</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
                 <div class="recent-order-table">
                     <div class="table-responsive">
                         <div class="entry-data-main d-flex align-items-center gap-2">
@@ -48,6 +91,16 @@ if (!defined('ABSPATH')) exit;
                                 <option value="100">100</option>
                             </select>
                             <span>Data</span>
+                            <select id="wpc-status-filter" class="form-select form-select ms-2 w-auto">
+                                <option value="">All Status</option>
+                                <option value="processing">Processing</option>
+                                <option value="completed">Completed</option>
+                                <option value="pending">Pending</option>
+                                <option value="on-hold">On Hold</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="refunded">Refunded</option>
+                                <option value="failed">Failed</option>
+                            </select>
                         </div>
                         <table class="table table-bordered mb-0 mt-0" id="wpc-orders-table">
                             <thead class="">
