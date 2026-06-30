@@ -13,9 +13,13 @@ if (function_exists('get_current_screen')) {
 
 $is_recent = (strpos($current_page, 'woc-order-notification') !== false);
 $is_settings = (strpos($current_page, 'woc-general-settings') !== false);
+$is_advanced = (strpos($current_page, 'woc-advanced-settings') !== false);
+$is_whatsapp = (strpos($current_page, 'woc-whatsapp-notification') !== false);
 
 $recent_orders_url = esc_url(admin_url('admin.php?page=woc-order-notification'));
 $general_settings_url = esc_url(admin_url('admin.php?page=woc-general-settings'));
+$advanced_settings_url = esc_url(admin_url('admin.php?page=woc-advanced-settings'));
+$whatsapp_settings_url = esc_url(admin_url('admin.php?page=woc-whatsapp-notification'));
 ?>
 <!-- Page Content Will Be Included Here -->
 <main>
@@ -50,6 +54,16 @@ $general_settings_url = esc_url(admin_url('admin.php?page=woc-general-settings')
                         <a class="nav-link mb-2 rounded <?php echo $is_settings ? 'active' : ''; ?>"
                             href="<?php echo esc_url($general_settings_url); ?>">
                             <span>General Settings</span>
+                        </a>
+                        <a class="pro-nav-item nav-link mb-2 rounded <?php echo $is_advanced ? 'active' : ''; ?>"
+                            href="<?php echo esc_url($advanced_settings_url); ?>">
+                            <span>Advanced Settings</span>
+                             <i class="fa-solid fa-lock"></i>
+                        </a>
+                        <a class="pro-nav-item nav-link mb-2 rounded <?php echo $is_whatsapp ? 'active' : ''; ?>"
+                            href="<?php echo esc_url($whatsapp_settings_url); ?>">
+                            <span>Whatsapp Notification Settings</span>
+                            <i class="fa-solid fa-lock"></i>
                         </a>
                     </nav>
                 </div>

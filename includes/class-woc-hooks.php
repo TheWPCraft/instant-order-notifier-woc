@@ -138,6 +138,8 @@ class WPC_WCON_Hooks
         $allowed_hooks = [
             'toplevel_page_woc-order-notification',
             'order-notifier_page_woc-general-settings',
+            'order-notifier_page_woc-advanced-settings',
+            'order-notifier_page_woc-whatsapp-notification',
         ];
 
         if (!in_array($hook, $allowed_hooks, true)) {
@@ -146,6 +148,7 @@ class WPC_WCON_Hooks
 
         wp_enqueue_style('bootstrap-css', WPC_WCON_URL . 'assets/bootstrap/css/bootstrap.min.css', [], '5.3.3');
         wp_enqueue_style('bootstrap-icons', WPC_WCON_URL . 'assets/bootstrap/css/bootstrap-icons.min.css', [], '1.11.3');
+        wp_enqueue_style('fontawsome','https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css', [], '7.0.1');
         wp_enqueue_style('wpc-admin-css', WPC_WCON_URL . 'assets/css/wpc-admin.css', [], '1.1');
 
         wp_enqueue_script('wpc-admin-js', WPC_WCON_URL . 'assets/js/wpc-admin.js', ['jquery'], '1.1', true);
