@@ -1,0 +1,19 @@
+name: Build Release Zip
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build and attach plugin zip
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Builds a distributable plugin.zip from the repo, excluding every
+      # path listed in .distignore, and attaches it to the GitHub Release
+      # that triggered this workflow.
+      - name: Build plugin zip
+        uses: 10up/action-wordpress-plugin-build-zip@stable

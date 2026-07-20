@@ -1,13 +1,24 @@
 <?php
-if (!defined('ABSPATH')) exit;
+/**
+ * Custom order table schema.
+ *
+ * @package Instant_Order_Notifier_Woc
+ */
 
-function wpc_create_order_table(){
-    global $wpdb;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
-    $table = $wpdb->prefix.'woc_orders';
-    $charset = $wpdb->get_charset_collate();
+/**
+ * Create (or upgrade) the {$wpdb->prefix}woc_orders table on plugin activation.
+ */
+function wpc_create_order_table() {
+	global $wpdb;
 
-    $sql = "CREATE TABLE $table (
+	$table   = $wpdb->prefix . 'woc_orders';
+	$charset = $wpdb->get_charset_collate();
+
+	$sql = "CREATE TABLE $table (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         order_id BIGINT UNSIGNED NOT NULL,
         customer_name VARCHAR(200),
@@ -18,6 +29,6 @@ function wpc_create_order_table(){
         UNIQUE KEY order_id (order_id)
     ) $charset;";
 
-    require_once ABSPATH.'wp-admin/includes/upgrade.php';
-    dbDelta($sql);
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+	dbDelta( $sql );
 }
