@@ -167,10 +167,14 @@ jQuery(document).ready(function ($) {
       currentModalInstance = null;
     }
 
-    popupText.html(`
-      Order #${orderData.id}<br>
-      <strong>${orderData.name}</strong>
-    `);
+    // Build the popup via text nodes (not .html()) so the customer-supplied
+    // billing name can never be interpreted as markup, even if a future
+    // change to the server response were to forget to escape it.
+    popupText.empty().append(
+      document.createTextNode("Order #" + orderData.id),
+      $("<br>"),
+      $("<strong>").text(orderData.name)
+    );
 
     const modalEl = document.getElementById("wpc-popup-modal");
     currentModalInstance = new bootstrap.Modal(modalEl, {
