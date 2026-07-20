@@ -219,7 +219,7 @@ class WPC_WCON_Hooks {
 		check_ajax_referer( 'wpc_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => 'Permission denied' ], 403 );
+			wp_send_json_error( [ 'message' => __( 'Permission denied', 'instant-order-notifier-woc' ) ], 403 );
 		}
 
 		$time = (int) get_option( 'wpc_last_order_time', 0 );
@@ -240,7 +240,7 @@ class WPC_WCON_Hooks {
 		check_ajax_referer( 'wpc_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => 'Permission denied' ], 403 );
+			wp_send_json_error( [ 'message' => __( 'Permission denied', 'instant-order-notifier-woc' ) ], 403 );
 		}
 
 		$orders = wc_get_orders(
@@ -253,7 +253,7 @@ class WPC_WCON_Hooks {
 		);
 
 		if ( empty( $orders ) ) {
-			wp_send_json_error( [ 'message' => 'No new orders' ] );
+			wp_send_json_error( [ 'message' => __( 'No new orders', 'instant-order-notifier-woc' ) ] );
 			return;
 		}
 
@@ -280,13 +280,13 @@ class WPC_WCON_Hooks {
 		check_ajax_referer( 'wpc_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => 'Permission denied' ], 403 );
+			wp_send_json_error( [ 'message' => __( 'Permission denied', 'instant-order-notifier-woc' ) ], 403 );
 		}
 
 		$order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
 
 		if ( ! $order_id ) {
-			wp_send_json_error( [ 'message' => 'Invalid order ID' ] );
+			wp_send_json_error( [ 'message' => __( 'Invalid order ID', 'instant-order-notifier-woc' ) ] );
 		}
 
 		update_option( 'wpc_last_seen_order_id', $order_id, false );
@@ -301,7 +301,7 @@ class WPC_WCON_Hooks {
 		check_ajax_referer( 'wpc_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => 'Permission denied' ], 403 );
+			wp_send_json_error( [ 'message' => __( 'Permission denied', 'instant-order-notifier-woc' ) ], 403 );
 		}
 
 		global $wpdb;
@@ -381,13 +381,13 @@ class WPC_WCON_Hooks {
 		check_ajax_referer( 'wpc_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => 'Permission denied' ] );
+			wp_send_json_error( [ 'message' => __( 'Permission denied', 'instant-order-notifier-woc' ) ] );
 		}
 
 		$order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
 
 		if ( ! $order_id ) {
-			wp_send_json_error( [ 'message' => 'Invalid order ID' ] );
+			wp_send_json_error( [ 'message' => __( 'Invalid order ID', 'instant-order-notifier-woc' ) ] );
 		}
 
 		global $wpdb;
@@ -403,10 +403,10 @@ class WPC_WCON_Hooks {
 		}
 
 		if ( false !== $deleted && $deleted > 0 ) {
-			wp_send_json_success( [ 'message' => 'Order removed' ] );
+			wp_send_json_success( [ 'message' => __( 'Order removed', 'instant-order-notifier-woc' ) ] );
 		}
 
-		wp_send_json_error( [ 'message' => 'Failed to remove order' ] );
+		wp_send_json_error( [ 'message' => __( 'Failed to remove order', 'instant-order-notifier-woc' ) ] );
 	}
 
 	/**
@@ -416,7 +416,7 @@ class WPC_WCON_Hooks {
 		check_ajax_referer( 'wpc_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => 'Permission denied' ], 403 );
+			wp_send_json_error( [ 'message' => __( 'Permission denied', 'instant-order-notifier-woc' ) ], 403 );
 		}
 
 		global $wpdb;

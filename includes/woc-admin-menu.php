@@ -75,8 +75,8 @@ add_action( 'admin_menu', 'wpc_add_admin_menu' );
  */
 function wpc_add_admin_menu() {
 	add_menu_page(
-		'Order Notifier',
-		'Order Notifier',
+		__( 'Order Notifier', 'instant-order-notifier-woc' ),
+		__( 'Order Notifier', 'instant-order-notifier-woc' ),
 		'manage_options',
 		'woc-order-notification',
 		'wpc_recent_orders_page',
@@ -86,8 +86,8 @@ function wpc_add_admin_menu() {
 
 	add_submenu_page(
 		'woc-order-notification',
-		'Recent Orders',
-		'Recent Orders',
+		__( 'Recent Orders', 'instant-order-notifier-woc' ),
+		__( 'Recent Orders', 'instant-order-notifier-woc' ),
 		'manage_options',
 		'woc-order-notification',
 		'wpc_recent_orders_page'
@@ -95,8 +95,8 @@ function wpc_add_admin_menu() {
 
 	add_submenu_page(
 		'woc-order-notification',
-		'General Settings',
-		'General Settings',
+		__( 'General Settings', 'instant-order-notifier-woc' ),
+		__( 'General Settings', 'instant-order-notifier-woc' ),
 		'manage_options',
 		'woc-general-settings',
 		'wpc_general_settings_page'
@@ -104,16 +104,16 @@ function wpc_add_admin_menu() {
 
 	add_submenu_page(
 		'woc-order-notification',
-		'Advanced Settings',
-		'Advanced Settings',
+		__( 'Advanced Settings', 'instant-order-notifier-woc' ),
+		__( 'Advanced Settings', 'instant-order-notifier-woc' ),
 		'manage_options',
 		'woc-advanced-settings',
 		'wpc_advanced_settings_page'
 	);
 	add_submenu_page(
 		'woc-order-notification',
-		'WhatsApp Notification Settings',
-		'WhatsApp Notification Settings',
+		__( 'WhatsApp Notification Settings', 'instant-order-notifier-woc' ),
+		__( 'WhatsApp Notification Settings', 'instant-order-notifier-woc' ),
 		'manage_options',
 		'woc-whatsapp-notification',
 		'wpc_whatsapp_notification_page'
@@ -170,9 +170,7 @@ function wpc_general_settings_page() {
 
 		update_option( 'wpc_notification_settings', $options, false );
 
-		echo '<div class="notice notice-success is-dismissible mt-3 ms-0">
-                <p>Settings saved successfully!</p>
-              </div>';
+		echo '<div class="notice notice-success is-dismissible mt-3 ms-0"><p>' . esc_html__( 'Settings saved successfully!', 'instant-order-notifier-woc' ) . '</p></div>';
 	}
 
 	require_once WPC_WCON_PATH . 'includes/sidebar.php';
@@ -249,7 +247,7 @@ function wpc_whatsapp_notification_page() {
 
 		update_option( 'wpc_notification_settings', $options, false );
 
-		echo '<div class="notice notice-success is-dismissible"><p>Settings saved successfully!</p></div>';
+		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved successfully!', 'instant-order-notifier-woc' ) . '</p></div>';
 	}
 
 	require_once WPC_WCON_PATH . 'includes/sidebar.php';

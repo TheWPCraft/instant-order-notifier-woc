@@ -26,9 +26,9 @@ $settings = get_option(
 		<form method="post" class="">
 			<div class="card-header">
 				<div class="d-flex align-items-center justify-content-between">
-					<h5 class="mb-0">General Settings</h5>
+					<h5 class="mb-0"><?php esc_html_e( 'General Settings', 'instant-order-notifier-woc' ); ?></h5>
 					<button type="submit" name="wpc_save_settings" class="btn btn-theme">
-						<i class="bi bi-save me-1"></i> Save Settings
+						<i class="bi bi-save me-1"></i> <?php esc_html_e( 'Save Settings', 'instant-order-notifier-woc' ); ?>
 					</button>
 				</div>
 			</div>
@@ -42,8 +42,8 @@ $settings = get_option(
 					<div class="card">
 						<div class="card-body d-flex justify-content-between align-items-center">
 							<div>
-								<h5 class="card-title mb-1">Enable Notifications</h5>
-								<p class="text-muted mb-0">Enable order notification alerts.</p>
+								<h5 class="card-title mb-1"><?php esc_html_e( 'Enable Notifications', 'instant-order-notifier-woc' ); ?></h5>
+								<p class="text-muted mb-0"><?php esc_html_e( 'Enable order notification alerts.', 'instant-order-notifier-woc' ); ?></p>
 							</div>
 							<div class="form-check form-switch">
 								<input class="form-check-input" type="checkbox" id="notification_enabled" name="notification_enabled"
@@ -55,9 +55,9 @@ $settings = get_option(
 					<div class="card">
 						<div class="card-body d-flex justify-content-between align-items-center">
 							<div>
-								<h5 class="card-title mb-1">Enable Desktop Notifications</h5>
+								<h5 class="card-title mb-1"><?php esc_html_e( 'Enable Desktop Notifications', 'instant-order-notifier-woc' ); ?></h5>
 								<p class="text-muted mb-0">
-									Allow browser notifications for new orders.
+									<?php esc_html_e( 'Allow browser notifications for new orders.', 'instant-order-notifier-woc' ); ?>
 								</p>
 							</div>
 							<div class="form-check form-switch">
@@ -66,16 +66,16 @@ $settings = get_option(
 							</div>
 						</div>
 						<div id="desktop-notification-tip" class="alert alert-info mt-0 m-2 small py-2" style="display:none;">
-							<strong>Windows:</strong> Settings → System → Notifications → Allow notifications from browser ON<br>
-							<strong>Mac:</strong> System Preferences → Notifications → Browser → Allow ON
+							<strong><?php esc_html_e( 'Windows:', 'instant-order-notifier-woc' ); ?></strong> <?php esc_html_e( 'Settings → System → Notifications → Allow notifications from browser ON', 'instant-order-notifier-woc' ); ?><br>
+							<strong><?php esc_html_e( 'Mac:', 'instant-order-notifier-woc' ); ?></strong> <?php esc_html_e( 'System Preferences → Notifications → Browser → Allow ON', 'instant-order-notifier-woc' ); ?>
 						</div>
 					</div>
 
 					<!-- Select Ringtone -->
 					<div class="card">
 						<div class="card-header">
-							<h5 class="card-title mb-0">Select Ringtone</h5>
-							<p class="text-muted mb-0">Choose your preferred notification sound.</p>
+							<h5 class="card-title mb-0"><?php esc_html_e( 'Select Ringtone', 'instant-order-notifier-woc' ); ?></h5>
+							<p class="text-muted mb-0"><?php esc_html_e( 'Choose your preferred notification sound.', 'instant-order-notifier-woc' ); ?></p>
 						</div>
 						<hr class="my-0">
 						<div class="card-body">
@@ -83,7 +83,7 @@ $settings = get_option(
 								<label class="list-group-item d-flex justify-content-between align-items-center mb-2 <?php echo '1' === $settings['ringtone'] ? 'active' : ''; ?>">
 									<div class="form-check">
 										<input class="form-check-input" type="radio" name="ringtone" value="1" id="ringtone1" <?php checked( $settings['ringtone'], '1' ); ?>>
-										<label class="form-check-label ms-3 fw-medium" for="ringtone1">Ringtone 1</label>
+										<label class="form-check-label ms-3 fw-medium" for="ringtone1"><?php esc_html_e( 'Ringtone 1', 'instant-order-notifier-woc' ); ?></label>
 									</div>
 									<button type="button" class="btn play-sound" data-sound="1">
 										<i class="bi bi-play-fill"></i>
@@ -92,7 +92,7 @@ $settings = get_option(
 								<label class="list-group-item d-flex justify-content-between align-items-center mb-2 <?php echo '2' === $settings['ringtone'] ? 'active' : ''; ?>">
 									<div class="form-check">
 										<input class="form-check-input" type="radio" name="ringtone" value="2" id="ringtone2" <?php checked( $settings['ringtone'], '2' ); ?>>
-										<label class="form-check-label ms-3 fw-medium" for="ringtone2">Ringtone 2</label>
+										<label class="form-check-label ms-3 fw-medium" for="ringtone2"><?php esc_html_e( 'Ringtone 2', 'instant-order-notifier-woc' ); ?></label>
 									</div>
 									<button type="button" class="btn play-sound" data-sound="2">
 										<i class="bi bi-play-fill"></i>
@@ -101,7 +101,7 @@ $settings = get_option(
 								<label class="list-group-item d-flex justify-content-between align-items-center mb-2 <?php echo '3' === $settings['ringtone'] ? 'active' : ''; ?>">
 									<div class="form-check">
 										<input class="form-check-input" type="radio" name="ringtone" value="3" id="ringtone3" <?php checked( $settings['ringtone'], '3' ); ?>>
-										<label class="form-check-label ms-3 fw-medium" for="ringtone3">Ringtone 3</label>
+										<label class="form-check-label ms-3 fw-medium" for="ringtone3"><?php esc_html_e( 'Ringtone 3', 'instant-order-notifier-woc' ); ?></label>
 									</div>
 									<button type="button" class="btn play-sound" data-sound="3">
 										<i class="bi bi-play-fill"></i>
@@ -114,8 +114,8 @@ $settings = get_option(
 					<!-- Order Check Speed -->
 					<div class="card">
 						<div class="card-header">
-							<h5 class="card-title mb-0">Order Check Speed</h5>
-							<p class="text-muted mb-0">How quickly should we check for new orders?</p>
+							<h5 class="card-title mb-0"><?php esc_html_e( 'Order Check Speed', 'instant-order-notifier-woc' ); ?></h5>
+							<p class="text-muted mb-0"><?php esc_html_e( 'How quickly should we check for new orders?', 'instant-order-notifier-woc' ); ?></p>
 						</div>
 						<hr class="my-0">
 						<div class="card-body">
@@ -124,30 +124,30 @@ $settings = get_option(
 									<input type="radio" class="btn-check" name="check_speed" id="speed_fast" value="fast" <?php checked( $settings['check_speed'], 'fast' ); ?>>
 									<label class="btn d-block" for="speed_fast" style="width:150px;">
 										<div class="fs-4 mb-2">⚡</div>
-										<h6 class="fw-bold mb-0">Fast</h6>
-										<small>Every 1 second</small>
+										<h6 class="fw-bold mb-0"><?php esc_html_e( 'Fast', 'instant-order-notifier-woc' ); ?></h6>
+										<small><?php esc_html_e( 'Every 1 second', 'instant-order-notifier-woc' ); ?></small>
 									</label>
 								</div>
 								<div class="text-center">
 									<input type="radio" class="btn-check" name="check_speed" id="speed_normal" value="normal" <?php checked( $settings['check_speed'], 'normal' ); ?>>
 									<label class="btn d-block" for="speed_normal" style="width:150px;">
 										<div class="fs-4 mb-2">🔔</div>
-										<h6 class="fw-bold mb-0">Normal</h6>
-										<small>Every 2 seconds</small>
+										<h6 class="fw-bold mb-0"><?php esc_html_e( 'Normal', 'instant-order-notifier-woc' ); ?></h6>
+										<small><?php esc_html_e( 'Every 2 seconds', 'instant-order-notifier-woc' ); ?></small>
 									</label>
 								</div>
 								<div class="text-center">
 									<input type="radio" class="btn-check" name="check_speed" id="speed_slow" value="slow" <?php checked( $settings['check_speed'], 'slow' ); ?>>
 									<label class="btn d-block" for="speed_slow" style="width:150px;">
 										<div class="fs-4 mb-2">🐢</div>
-										<h6 class="fw-bold mb-0">Slow</h6>
-										<small>Every 6 seconds</small>
+										<h6 class="fw-bold mb-0"><?php esc_html_e( 'Slow', 'instant-order-notifier-woc' ); ?></h6>
+										<small><?php esc_html_e( 'Every 6 seconds', 'instant-order-notifier-woc' ); ?></small>
 									</label>
 								</div>
 							</div>
 							<div class="alert alert-info mb-0 mt-3 small py-2">
 								<i class="bi bi-info-circle me-2"></i>
-								<strong>Tip:</strong> Use "Normal" for most stores. Use "Slow" if your server is slow.
+								<strong><?php esc_html_e( 'Tip:', 'instant-order-notifier-woc' ); ?></strong> <?php esc_html_e( 'Use "Normal" for most stores. Use "Slow" if your server is slow.', 'instant-order-notifier-woc' ); ?>
 							</div>
 						</div>
 					</div>
@@ -157,7 +157,7 @@ $settings = get_option(
 			<!-- Save Button -->
 			<div class="card-footer text-end">
 				<button type="submit" name="wpc_save_settings" class="btn btn-theme">
-					<i class="bi bi-save me-2"></i> Save Settings
+					<i class="bi bi-save me-2"></i> <?php esc_html_e( 'Save Settings', 'instant-order-notifier-woc' ); ?>
 				</button>
 			</div>
 		</form>

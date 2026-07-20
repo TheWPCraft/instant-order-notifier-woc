@@ -33,12 +33,12 @@ $whatsapp_settings_url = esc_url( admin_url( 'admin.php?page=woc-whatsapp-notifi
 	<div class="container-fluid ps-0 py-0">
 		<nav class="navbar navbar-expand-sm navbar-light mb-3 shadow-sm py-2">
 			<div class="px-2 d-flex justify-content-between align-items-center w-100">
-				<a class="navbar-brand py-0" href="#">Woo Order Notification</a>
+				<a class="navbar-brand py-0" href="#"><?php esc_html_e( 'Woo Order Notification', 'instant-order-notifier-woc' ); ?></a>
 				<ul class="navbar-nav ms-auto mt-2 mt-lg-0 gap-2">
 					<li class="nav-item">
 						<a class="nav-link"
 							href="https://mail.google.com/mail/?view=cm&fs=1&to=support@thewpcraft.com&su=Support&body=Hello"
-							target="_blank">Support</a>
+							target="_blank"><?php esc_html_e( 'Support', 'instant-order-notifier-woc' ); ?></a>
 					</li>
 					<!-- <li class="nav-item">
 						<a class="nav-link" href="#">Documentations</a>
@@ -55,21 +55,21 @@ $whatsapp_settings_url = esc_url( admin_url( 'admin.php?page=woc-whatsapp-notifi
 					<nav class="nav nav-pills flex-column">
 						<a class="nav-link mb-3 rounded <?php echo $is_recent ? 'active' : ''; ?>"
 							href="<?php echo esc_url( $recent_orders_url ); ?>">
-							<span>Recent Orders</span>
+							<span><?php esc_html_e( 'Recent Orders', 'instant-order-notifier-woc' ); ?></span>
 						</a>
-						<span class="nav-link-main-text"> settings </span>
+						<span class="nav-link-main-text"> <?php esc_html_e( 'settings', 'instant-order-notifier-woc' ); ?> </span>
 						<a class="nav-link mb-2 rounded <?php echo $is_settings ? 'active' : ''; ?>"
 							href="<?php echo esc_url( $general_settings_url ); ?>">
-							<span>General Settings</span>
+							<span><?php esc_html_e( 'General Settings', 'instant-order-notifier-woc' ); ?></span>
 						</a>
 						<a class="pro-nav-item nav-link mb-2 rounded <?php echo $is_advanced ? 'active' : ''; ?>"
 							href="<?php echo esc_url( $advanced_settings_url ); ?>">
-							<span>Advanced Settings</span>
+							<span><?php esc_html_e( 'Advanced Settings', 'instant-order-notifier-woc' ); ?></span>
 							<i class="bi bi-lock-fill"></i>
 						</a>
 						<a class="pro-nav-item nav-link mb-2 rounded <?php echo $is_whatsapp ? 'active' : ''; ?>"
 							href="<?php echo esc_url( $whatsapp_settings_url ); ?>">
-							<span>Whatsapp Notification Settings</span>
+							<span><?php esc_html_e( 'WhatsApp Notification Settings', 'instant-order-notifier-woc' ); ?></span>
 							<i class="bi bi-lock-fill"></i>
 						</a>
 					</nav>
