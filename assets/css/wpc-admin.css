@@ -431,6 +431,105 @@ input[type="radio"]:checked::before {
 }
 
 
+/* Professional Custom Audio Design */
+.wpc-custom-audio-manager {
+  background: #fff;
+  border-radius: 12px;
+}
+
+.wpc-audio-slot {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.wpc-audio-slot:hover {
+  border-color: #8b5cf6;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.08);
+}
+
+.wpc-audio-slot.active-slot {
+  border-color: #8b5cf6;
+  background: #fdfcff;
+  box-shadow: 0 0 0 1px #8b5cf6;
+}
+
+.wpc-audio-slot .slot-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wpc-audio-slot .slot-label i {
+  color: #8b5cf6;
+}
+
+.wpc-audio-slot .file-input-wrapper {
+  margin-top: 10px;
+}
+
+.wpc-audio-slot .current-file-info {
+  background: #fff;
+  border: 1px dashed #ced4da;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wpc-audio-slot .action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.wpc-audio-slot .btn-action {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 0;
+  transition: 0.2s;
+}
+
+.wpc-audio-slot .btn-play-preview {
+  background: #8b5cf6;
+  color: #fff;
+}
+
+.wpc-audio-slot .btn-play-preview:hover {
+  background: #7c4dff;
+  color: #fff;
+}
+
+.wpc-audio-slot .btn-remove-file {
+  background: #fff;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+}
+
+.wpc-audio-slot .btn-remove-file:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+.wpc-audio-slot .form-check-input {
+  cursor: pointer;
+  width: 1.2em;
+  height: 1.2em;
+}
+
 
 .wpc-dashboard .card {
     border-radius: 10px;
@@ -521,6 +620,18 @@ input[type="radio"]:checked::before {
 .pro-text p {
   margin-bottom: 0px;
   font-size: 13px;
+}
+.pro-text ul {
+  list-style: disc;
+  margin-bottom: 0;
+}
+.pro-text ul li {
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+.pro-text ul li strong {
+  background-color: #8a5cf637;
+  padding: 2px 6px;
 }
 .pro-nav-item {
   display: flex;
