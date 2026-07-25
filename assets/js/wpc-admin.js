@@ -181,8 +181,20 @@ jQuery(document).ready(function ($) {
     currentModalInstance.show();
 
     // Play sound only if enabled and unlocked
+    // if (isSoundEnabled && isAudioUnlocked) {
+    //   audio.src = wpcData.audio_urls[settings.ringtone] || wpcData.audio;
+    //   audio.currentTime = 0;
+    //   audio.play().catch(() => {});
+
+    //   if (repeatInterval) clearInterval(repeatInterval);
+    //   repeatInterval = setInterval(() => {
+    //     audio.currentTime = 0;
+    //     audio.play().catch(() => {});
+    //   }, 4000);
+    // }
     if (isSoundEnabled && isAudioUnlocked) {
-      audio.src = wpcData.audio_urls[settings.ringtone] || wpcData.audio;
+      const soundUrl = wpcData.audio_urls[settings.ringtone] || wpcData.audio;
+      audio.src = soundUrl;
       audio.currentTime = 0;
       audio.play().catch(() => {});
 
@@ -341,14 +353,67 @@ jQuery(document).ready(function ($) {
   // Settings Page Sound Preview
   // ────────────────────────────────────────────────
 
+  // if (isSettingsPage) {
+  //   $(".play-sound").on("click", function () {
+  //     const soundNum = $(this).data("sound");
+  //     const soundUrl = wpcData.audio_urls[soundNum];
+  //     if (soundUrl) {
+  //       const previewAudio = new Audio(soundUrl);
+  //       previewAudio.volume = 0.7;
+  //       previewAudio.play().catch((e) => console.log("Audio preview failed:", e));
+  //     }
+  //   });
+  // }
+
+    // ────────────────────────────────────────────────
+  // Settings Page Sound Preview
+  // ────────────────────────────────────────────────
+
   if (isSettingsPage) {
     $(".play-sound").on("click", function () {
       const soundNum = $(this).data("sound");
-      const soundUrl = wpcData.audio_urls[soundNum];
+      let soundUrl = wpcData.audio_urls[soundNum];
+
       if (soundUrl) {
         const previewAudio = new Audio(soundUrl);
         previewAudio.volume = 0.7;
-        previewAudio.play().catch((e) => console.log("Audio preview failed:", e));
+        previewAudio.play().catch((e) => console.log("Preview failed:", e));
+      }
+    });
+
+    // Handle Multiple File Selection Validation
+    $("#custom_ringtones").on("change", function () {
+        if (this.files.length > 2) {
+            alert("You can only upload a maximum of 2 files at a time.");
+            $(this).val('');
+        }
+    });
+
+    // Remove Custom Sound Button - FIXED
+    $("#remove_custom_sound, #remove_custom_sound_2").off("click").on("click", function () {
+      const isSecond = $(this).attr('id') === 'remove_custom_sound_2';
+      const slotName = isSecond ? "Sound 2" : "Sound 1";
+
+      if (confirm(`Are you sure you want to remove your custom notification ${slotName}?`)) {
+        const $form = $(this).closest('form');
+
+        // Set the hidden field value
+        if (isSecond) {
+          $("#remove_custom_sound_2_input").val('1');
+        } else {
+          $("#remove_custom_sound_input").val('1');
+        }
+
+        // Ensure wpc_save_settings is present in POST data
+        if ($form.find('input[name="wpc_save_settings"]').length === 0) {
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'wpc_save_settings',
+                value: '1'
+            }).appendTo($form);
+        }
+
+        $form.submit();
       }
     });
   }
