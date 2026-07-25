@@ -4,7 +4,7 @@ Tags: order notification, order alert, woocommerce notification
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.4.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 WC requires at least: 7.0
@@ -14,37 +14,163 @@ Real-time new order notification with sound alert, popup, dashboard stats, statu
 
 == Description ==
 
-Instant Order Notification for WooCommerce – Get Audio Alerts for New Orders helps store owners instantly know when a new order arrives — without constantly refreshing or checking the dashboard.
+Instant Order Notification for WooCommerce helps store owners stay informed the moment a new order is placed. No more constantly refreshing the WooCommerce orders page or keeping the dashboard open all day.
 
-As soon as a new order is placed, the plugin instantly alerts you with a popup notification and sound so you never miss an order.
+As soon as a customer places an order, the plugin instantly displays a popup notification, plays a notification sound, sends a desktop browser notification, and automatically refreshes the recent orders table—so you never miss an order.
+
+Designed for busy WooCommerce store owners, this lightweight plugin keeps you updated in real time while you focus on running your business.
 
 What happens when a new order arrives?
-- Shows a clean popup notification with Order ID, Customer Name, and Order Total
+- Displays a clean popup with Order ID, Customer Name, Order Total, and Order Status
 - Plays an instant audio notification
-- Desktop notification support for real-time alerts
+- Sends a desktop browser notification (with permission)
 - Automatically refreshes the recent orders table
-- Displays dashboard summary (Today Orders, Processing, Completed, Cancelled)
-- Filter orders by status (Processing, Completed, Pending, etc.)
-- Includes sound mute/unmute control with a visual reminder
-- Choose from multiple ringtone options
-- Adjustable order check speed (Fast, Normal, Slow)
+- Updates dashboard summary cards instantly
+- Keeps you informed without manually refreshing the WooCommerce dashboard
 
-Perfect for busy WooCommerce store owners who want to respond to orders quickly without manually monitoring the dashboard.
+Free Features
+🚀 Real-Time Order Detection
+Instantly detects new WooCommerce orders as soon as they are placed.
 
-### Key Features:
-- Real-time new order detection
-- Desktop browser notifications for new orders
-- 3 built-in notification ringtones
-- Clean popup with order details
-- Auto-refresh recent orders table
-- Dashboard summary cards (Today, Processing, Completed, Cancelled)
-- Status-wise order filtering (Processing, Pending, Completed, etc.)
-- Orders table with pagination support
-- Sound toggle with animated reminder when muted
-- Check speed options: Fast (1 sec), Normal (2 sec), Slow (6 sec)
-- Fully responsive admin interface
-- No external CDN dependencies (all assets bundled locally)
-- Lightweight and fast
+🔔 Popup Notifications
+Displays a clean and modern popup with important order details.
+
+🔊 Audio Notifications
+Never miss a new order with built-in notification sounds.
+
+🖥 Desktop Browser Notifications
+Receive browser notifications even while working in another tab.
+
+📊 Dashboard Summary
+
+View your store performance at a glance.
+- Today's Orders
+- Processing Orders
+- Completed Orders
+- Cancelled Orders
+
+📋 Recent Orders Table
+Automatically refreshes the latest orders without reloading the page.
+
+🔍 Order Status Filter
+Quickly filter orders by status.
+- Processing
+- Pending
+- Completed
+- Cancelled
+- On Hold
+- Failed
+
+🎵 Multiple Notification Sounds
+Choose from three built-in ringtone options or upload up to 2 of your own custom notification sounds.
+
+🔊 Custom Audio Manager
+Upload, preview, and manage your own notification sounds with a professional interface. (Supports MP3, WAV, OGG)
+
+🔇 Sound Control
+Mute or unmute notifications anytime with a visual reminder.
+
+⚡ Adjustable Check Speed
+Choose how frequently the plugin checks for new orders.
+- Fast (1 Second)
+- Normal (2 Seconds)
+- Slow (6 Seconds)
+
+📱 Responsive Admin Interface
+Works perfectly across desktop, tablet, and mobile devices.
+
+⚡ Lightweight & Optimized
+Built for speed with no unnecessary scripts or external CDN dependencies.
+
+🚀 Upgrade to Pro
+Take your WooCommerce order notifications to the next level with powerful WhatsApp Notifications and advanced notification rules.
+The Pro version ensures you receive WhatsApp alerts only for the orders that matter most.
+
+
+<p>
+⭐ <a href="https://thewpcraft.com/plugins-details/instant-order-notification">Upgrade to Pro</a> |
+💬 <a href="https://thewpcraft.com/contact-us">Get Support</a>
+</p>
+
+
+Pro Features
+
+📲 Instant WhatsApp Order Notifications
+Receive instant WhatsApp notifications whenever a new WooCommerce order is placed.
+Stay connected with your store even when you're away from your computer.
+
+💰 Minimum Order Value Notifications
+Avoid unnecessary notifications by sending WhatsApp alerts only when an order reaches your preferred minimum amount.
+Examples:
+- Notify only for orders above ₹500
+- Notify only for orders above ₹1000
+- Set any custom order value
+Perfect for stores that want alerts only for high-value orders.
+
+🛍 Product-Based Notifications
+Choose exactly which WooCommerce products should trigger WhatsApp notifications.
+Ideal for:
+- Premium Products
+- Best Sellers
+- Limited Stock Products
+- High Priority Items
+
+📂 Category-Based Notifications
+Receive WhatsApp notifications only when customers purchase products from selected categories.
+Perfect for stores with multiple departments or product categories.
+
+🏷 Product Tag Notifications
+Send WhatsApp notifications only for products containing selected product tags.
+Gain precise control over which orders generate alerts.
+
+🎯 Smart Notification Rules
+Create advanced notification rules by combining:
+- Minimum Order Value
+- Selected Products
+- Selected Categories
+- Selected Product Tags
+Receive WhatsApp notifications only when your custom conditions are met.
+
+⚡ Priority Updates
+Get access to new premium features and improvements before the free version.
+
+💬 Premium Support
+- Receive fast and dedicated support for all Pro users.
+- Why Choose Instant Order Notification?
+- Never miss a WooCommerce order
+- Instant popup, sound, and desktop notifications
+- Stay informed in real time
+- Save time by eliminating manual dashboard refreshes
+- Advanced WhatsApp notifications available in Pro
+- Smart filtering to reduce unnecessary alerts
+- Lightweight, fast, and easy to use
+- Beginner-friendly setup
+- Perfect For
+- WooCommerce Store Owners
+- Online Businesses
+- Retail Stores
+- Wholesale Businesses
+- Grocery Stores
+- Restaurants & Food Delivery
+- Fashion Stores
+- Electronics Stores
+- Print-on-Demand Stores
+- Dropshipping Businesses
+- Digital Product Sellers
+- Upgrade to Pro
+Unlock the complete notification experience with advanced WhatsApp features.
+
+✅ Pro Includes
+- Instant WhatsApp Order Notifications
+- Minimum Order Value Rules
+- Product-Based Notifications
+- Category-Based Notifications
+- Product Tag Notifications
+- Smart Notification Rules
+- Premium Support
+- Priority Updates
+- Future Premium Features
+Instant Order Notification Pro gives you complete control over your WooCommerce notifications, helping you stay informed while reducing unnecessary alerts. Configure powerful notification rules and receive WhatsApp notifications only for the orders that matter most.
 
 == Installation ==
 
@@ -61,7 +187,7 @@ Yes. It works in the WordPress admin area only, so no conflicts with frontend th
 
 = Can I change the notification sound? =
 
-Yes! Go to **General Settings** → choose from 3 built-in ringtones.
+Yes! Go to **General Settings** → choose from 3 built-in ringtones or upload up to 2 custom sounds of your own.
 
 = Can I disable sound but keep the popup? =
 
@@ -85,6 +211,19 @@ Yes. You will still receive the notification even if you are working in another 
 
 
 == Changelog ==
+
+= 1.4.2 =
+* NEW: Added support for 2 custom notification sound slots.
+* NEW: Professional UI for managing custom notification sounds.
+* NEW: Unified multi-file upload for custom sounds.
+* NEW: Intelligent audio slot assignment (automatically fills empty slots).
+* IMPROVED: Auto-deletion of old audio files from the server when replaced.
+
+
+= 1.4.1 =
+* Updated plugin images and screenshots.
+* Refined descriptions and content.
+* Fixed several bugs.
 
 = 1.4.0 =
 * PRO: Added Advanced Notification Rules.
@@ -134,6 +273,12 @@ Yes. You will still receive the notification even if you are working in another 
 * Layout and styling updates
 * Improved responsiveness for mobile and tablet
 * Minor bug fixes and performance enhancements
+
+= 1.0.0 =
+* Initial release
+* Real-time order detection
+* Sound and popup notifications
+* Auto-refresh order table
 
 = 1.0.0 =
 * Initial release
