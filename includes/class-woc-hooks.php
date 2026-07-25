@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WPC Order Notification Hooks Class
  *
@@ -25,6 +26,7 @@ class WPC_WCON_Hooks
         add_action('admin_head', [$this, 'wpc_global_bell_icon_customization']);
 
         add_action('wp_ajax_wpc_get_dashboard_stats', [$this, 'wpc_get_dashboard_stats']);
+        add_action('admin_init', [$this, 'wpc_save_general_settings']);
     }
 
     /**
@@ -32,39 +34,62 @@ class WPC_WCON_Hooks
      */
     public function wpc_global_bell_icon_customization()
     {
-        ?>
+?>
         <style type="text/css">
-            li.toplevel_page_woc-order-notification > a > div.wp-menu-image::before {
+            li.toplevel_page_woc-order-notification>a>div.wp-menu-image::before {
                 animation: wpc-bell-ring 2.2s ease-in-out infinite;
                 -webkit-animation: wpc-bell-ring 2.2s ease-in-out infinite;
                 transform-origin: center top;
             }
 
-            li.toplevel_page_woc-order-notification.current > a > div.wp-menu-image::before,
-            li.toplevel_page_woc-order-notification.wp-menu-open > a > div.wp-menu-image::before {
+            li.toplevel_page_woc-order-notification.current>a>div.wp-menu-image::before,
+            li.toplevel_page_woc-order-notification.wp-menu-open>a>div.wp-menu-image::before {
                 animation: wpc-bell-ring 2.2s ease-in-out infinite;
                 -webkit-animation: wpc-bell-ring 2.2s ease-in-out infinite;
             }
 
             @keyframes wpc-bell-ring {
-                0%   { transform: rotate(0deg); }
-                10%  { transform: rotate(14deg); }
-                20%  { transform: rotate(-12deg); }
-                30%  { transform: rotate(10deg); }
-                40%  { transform: rotate(-8deg); }
-                50%  { transform: rotate(6deg); }
-                60%  { transform: rotate(0deg); }
-                100% { transform: rotate(0deg); }
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                10% {
+                    transform: rotate(14deg);
+                }
+
+                20% {
+                    transform: rotate(-12deg);
+                }
+
+                30% {
+                    transform: rotate(10deg);
+                }
+
+                40% {
+                    transform: rotate(-8deg);
+                }
+
+                50% {
+                    transform: rotate(6deg);
+                }
+
+                60% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(0deg);
+                }
             }
         </style>
-        <?php
+<?php
     }
 
     /**
      * Save/Update order in our custom table when status changes
      */
-    
-     public function wpc_save_order_status($order_id, $old_status, $new_status, $order = null)
+
+    public function wpc_save_order_status($order_id, $old_status, $new_status, $order = null)
     {
         // Debug: hook trigger થયો કે નહીં જોવા માટે log
         error_log("[WPC_DEBUG] Order status changed hook fired for order #$order_id | Old: $old_status → New: $new_status");
@@ -148,7 +173,7 @@ class WPC_WCON_Hooks
 
         wp_enqueue_style('bootstrap-css', WPC_WCON_URL . 'assets/bootstrap/css/bootstrap.min.css', [], '5.3.3');
         wp_enqueue_style('bootstrap-icons', WPC_WCON_URL . 'assets/bootstrap/css/bootstrap-icons.min.css', [], '1.11.3');
-        wp_enqueue_style('fontawsome','https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css', [], '7.0.1');
+        wp_enqueue_style('fontawsome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css', [], '7.0.1');
         wp_enqueue_style('wpc-admin-css', WPC_WCON_URL . 'assets/css/wpc-admin.css', [], '1.1');
 
         wp_enqueue_script('wpc-admin-js', WPC_WCON_URL . 'assets/js/wpc-admin.js', ['jquery'], '1.1', true);
@@ -169,6 +194,8 @@ class WPC_WCON_Hooks
                 '1' => WPC_WCON_URL . 'assets/audio/notification-1.wav',
                 '2' => WPC_WCON_URL . 'assets/audio/notification-2.wav',
                 '3' => WPC_WCON_URL . 'assets/audio/notification-3.wav',
+                'custom' => !empty($settings['custom_ringtone_url']) ? $settings['custom_ringtone_url'] : '',
+                'custom2' => !empty($settings['custom_ringtone_url_2']) ? $settings['custom_ringtone_url_2'] : ''
             ],
         ]);
 
@@ -324,12 +351,12 @@ class WPC_WCON_Hooks
 
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $deleted = $wpdb->delete($table, ['order_id' => $order_id], ['%d']);
-        
+
         // Invalidate list cache
         if ($deleted !== false && $deleted > 0) {
             //  wp_cache_set('wpc_orders_last_changed', microtime(), 'woc-order-notification');
-             wp_cache_set('wpc_orders_last_changed', microtime(), 'wpc_order_notification');
-             wp_cache_delete('wpc_order_exists_' . $order_id, 'woc-order-notification');
+            wp_cache_set('wpc_orders_last_changed', microtime(), 'wpc_order_notification');
+            wp_cache_delete('wpc_order_exists_' . $order_id, 'woc-order-notification');
         }
 
         if ($deleted !== false && $deleted > 0) {
@@ -339,40 +366,165 @@ class WPC_WCON_Hooks
         wp_send_json_error(['message' => 'Failed to remove order']);
     }
 
+    /**
+     * Save General Settings + Custom Ringtone Upload + Remove
+     */
+    public function wpc_save_general_settings()
+    {
+        if (!isset($_POST['wpc_save_settings'])) {
+            return;
+        }
+
+        check_admin_referer('wpc_save_settings_nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Permission denied.', 'instant-order-notifier-woc'));
+        }
+
+        // ←←← Pehla settings load karo
+        $settings = get_option('wpc_notification_settings', [
+            'notification_enabled' => '1',
+            'ringtone'             => '1',
+            'check_speed'          => 'normal',
+            'desktop_notifications_enabled' => '0'
+        ]);
+
+        // Basic Settings
+        $settings['notification_enabled']          = isset($_POST['notification_enabled']) ? '1' : '0';
+        $settings['desktop_notifications_enabled'] = isset($_POST['desktop_notifications_enabled']) ? '1' : '0';
+        $settings['ringtone']                      = sanitize_text_field($_POST['ringtone'] ?? '1');
+        $settings['check_speed']                   = sanitize_text_field($_POST['check_speed'] ?? 'normal');
+
+        // ==================== REMOVE CUSTOM SOUND 1 ====================
+        if (isset($_POST['remove_custom_sound']) && $_POST['remove_custom_sound'] == '1') {
+            if (!empty($settings['custom_ringtone_url'])) {
+                $filename = basename($settings['custom_ringtone_url']);
+                $file_path = WPC_WCON_PATH . 'assets/audio/' . $filename;
+
+                if (file_exists($file_path)) {
+                    unlink($file_path);
+                }
+            }
+            unset($settings['custom_ringtone_url']);
+            if ($settings['ringtone'] === 'custom') $settings['ringtone'] = '1';
+
+            update_option('wpc_notification_settings', $settings);
+            add_settings_error('wpc_settings', 'removed', 'Custom sound 1 removed!', 'success');
+            return;
+        }
+
+        // ==================== REMOVE CUSTOM SOUND 2 ====================
+        if (isset($_POST['remove_custom_sound_2']) && $_POST['remove_custom_sound_2'] == '1') {
+            if (!empty($settings['custom_ringtone_url_2'])) {
+                $filename = basename($settings['custom_ringtone_url_2']);
+                $file_path = WPC_WCON_PATH . 'assets/audio/' . $filename;
+
+                if (file_exists($file_path)) {
+                    unlink($file_path);
+                }
+            }
+            unset($settings['custom_ringtone_url_2']);
+            if ($settings['ringtone'] === 'custom2') $settings['ringtone'] = '1';
+
+            update_option('wpc_notification_settings', $settings);
+            add_settings_error('wpc_settings', 'removed', 'Custom sound 2 removed!', 'success');
+            return;
+        }
+
+        // ==================== UPLOAD CUSTOM SOUNDS (Single Multiple Input) ====================
+        if (!empty($_FILES['custom_ringtones']['name'][0])) {
+            $files = $_FILES['custom_ringtones'];
+            $audio_dir = WPC_WCON_PATH . 'assets/audio/';
+            if (!file_exists($audio_dir)) {
+                wp_mkdir_p($audio_dir);
+            }
+
+            $file_count = count(array_filter($files['name']));
+
+            if ($file_count >= 2) {
+                // Upload both files sequentially to Slot 1 and Slot 2
+                for ($i = 0; $i < 2; $i++) {
+                    if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
+
+                    $slot_key = ($i === 0) ? 'custom_ringtone_url' : 'custom_ringtone_url_2';
+                    $ringtone_val = ($i === 0) ? 'custom' : 'custom2';
+
+                    // Delete old file
+                    if (!empty($settings[$slot_key])) {
+                        $old_file = $audio_dir . basename($settings[$slot_key]);
+                        if (file_exists($old_file)) unlink($old_file);
+                    }
+
+                    $filename = ($i === 1 ? 'v2-' : '') . time() . '-' . sanitize_file_name($files['name'][$i]);
+                    if (move_uploaded_file($files['tmp_name'][$i], $audio_dir . $filename)) {
+                        $settings[$slot_key] = WPC_WCON_URL . 'assets/audio/' . $filename;
+                        $settings['ringtone'] = $ringtone_val;
+                    }
+                }
+            } else {
+                // Upload single file - Intelligent slot assignment
+                if ($files['error'][0] === UPLOAD_ERR_OK) {
+                    $target_slot = 'custom_ringtone_url';
+                    $target_ringtone = 'custom';
+
+                    // If user has selected Slot 2, or Slot 1 is full but Slot 2 is empty, use Slot 2
+                    if ($settings['ringtone'] === 'custom2' || (!empty($settings['custom_ringtone_url']) && empty($settings['custom_ringtone_url_2']))) {
+                        $target_slot = 'custom_ringtone_url_2';
+                        $target_ringtone = 'custom2';
+                    }
+
+                    // Delete old file in targeted slot
+                    if (!empty($settings[$target_slot])) {
+                        $old_file = $audio_dir . basename($settings[$target_slot]);
+                        if (file_exists($old_file)) unlink($old_file);
+                    }
+
+                    $filename = ($target_slot === 'custom_ringtone_url_2' ? 'v2-' : '') . time() . '-' . sanitize_file_name($files['name'][0]);
+                    if (move_uploaded_file($files['tmp_name'][0], $audio_dir . $filename)) {
+                        $settings[$target_slot] = WPC_WCON_URL . 'assets/audio/' . $filename;
+                        $settings['ringtone'] = $target_ringtone;
+                    }
+                }
+            }
+        }
+
+        update_option('wpc_notification_settings', $settings);
+    }
+
     public function wpc_get_dashboard_stats()
-{
-    check_ajax_referer('wpc_nonce', 'nonce');
+    {
+        check_ajax_referer('wpc_nonce', 'nonce');
 
-    global $wpdb;
-    $table = $wpdb->prefix . 'woc_orders';
+        global $wpdb;
+        $table = $wpdb->prefix . 'woc_orders';
 
-    $today = date('Y-m-d');
+        $today = date('Y-m-d');
 
-    // Today orders
-    $today_orders = $wpdb->get_var(
-        $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE DATE(created_at) = %s", $today)
-    );
+        // Today orders
+        $today_orders = $wpdb->get_var(
+            $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE DATE(created_at) = %s", $today)
+        );
 
-    // Status wise count (today only)
-    $processing = $wpdb->get_var(
-        $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s AND DATE(created_at) = %s", 'processing', $today)
-    );
+        // Status wise count (today only)
+        $processing = $wpdb->get_var(
+            $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s AND DATE(created_at) = %s", 'processing', $today)
+        );
 
-    $completed = $wpdb->get_var(
-        $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s AND DATE(created_at) = %s", 'completed', $today)
-    );
+        $completed = $wpdb->get_var(
+            $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s AND DATE(created_at) = %s", 'completed', $today)
+        );
 
-    $cancelled = $wpdb->get_var(
-        $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s AND DATE(created_at) = %s", 'cancelled', $today)
-    );
+        $cancelled = $wpdb->get_var(
+            $wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s AND DATE(created_at) = %s", 'cancelled', $today)
+        );
 
-    wp_send_json_success([
-        'today'      => (int) $today_orders,
-        'processing' => (int) $processing,
-        'completed'  => (int) $completed,
-        'cancelled'  => (int) $cancelled,
-    ]);
-}
+        wp_send_json_success([
+            'today'      => (int) $today_orders,
+            'processing' => (int) $processing,
+            'completed'  => (int) $completed,
+            'cancelled'  => (int) $cancelled,
+        ]);
+    }
 }
 
 // Initialize
