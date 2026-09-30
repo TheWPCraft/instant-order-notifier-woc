@@ -1,8 +1,8 @@
 === Instant Order Notification for WooCommerce – Get Audio Alert on new Orders ===
-Contributors: thewpcraft, alkesh7
+Contributors: thewpcraft
 Tags: order notification, order alert, woocommerce notification
 Requires at least: 5.6
-Tested up to: 7.0
+Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: 1.4.2
 License: GPLv2 or later
@@ -10,7 +10,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 WC requires at least: 7.0
 WC tested up to: 9.3
 
-Instant popup, sound, and desktop alerts the moment a WooCommerce order arrives — plus a live dashboard and recent-orders table in wp-admin.
+Real-time new order notification with sound alert, popup, dashboard stats, status filtering, and auto-refresh table for WooCommerce store owners.
 
 == Description ==
 
@@ -62,7 +62,10 @@ Quickly filter orders by status.
 - Failed
 
 🎵 Multiple Notification Sounds
-Choose from three built-in ringtone options.
+Choose from three built-in ringtone options or upload up to 2 of your own custom notification sounds.
+
+🔊 Custom Audio Manager
+Upload, preview, and manage your own notification sounds with a professional interface. (Supports MP3, WAV, OGG)
 
 🔇 Sound Control
 Mute or unmute notifications anytime with a visual reminder.
@@ -82,6 +85,13 @@ Built for speed with no unnecessary scripts or external CDN dependencies.
 🚀 Upgrade to Pro
 Take your WooCommerce order notifications to the next level with powerful WhatsApp Notifications and advanced notification rules.
 The Pro version ensures you receive WhatsApp alerts only for the orders that matter most.
+
+
+<p>
+⭐ <a href="https://thewpcraft.com/plugins-details/instant-order-notification">Upgrade to Pro</a> |
+💬 <a href="https://thewpcraft.com/contact-us">Get Support</a>
+</p>
+
 
 Pro Features
 
@@ -177,7 +187,7 @@ Yes. It works in the WordPress admin area only, so no conflicts with frontend th
 
 = Can I change the notification sound? =
 
-Yes! Go to **General Settings** → choose from 3 built-in ringtones.
+Yes! Go to **General Settings** → choose from 3 built-in ringtones or upload up to 2 custom sounds of your own.
 
 = Can I disable sound but keep the popup? =
 
@@ -189,7 +199,7 @@ You can set it in settings: Fast (every 1 second), Normal (every 2 seconds), or 
 
 = Is it compatible with the latest WooCommerce? =
 
-Yes. Fully tested with WooCommerce 9.3 and WordPress 7.0.
+Yes. Fully tested with WooCommerce 9.3 and WordPress 6.4.
 
 = Do I need to allow browser notifications? =
 
@@ -203,14 +213,12 @@ Yes. You will still receive the notification even if you are working in another 
 == Changelog ==
 
 = 1.4.2 =
-* SECURITY: Fixed a stored XSS in the new-order popup (customer billing name was not escaped before being rendered).
-* SECURITY: Added missing capability checks on several AJAX endpoints (order list, dashboard stats, mark-as-seen).
-* SECURITY: Stopped shipping the Twilio Auth Token and other saved credentials into page/JS source; disabled autoload on the settings option.
-* FIX: Corrected a mismatched text domain and a settings-page fatal caused by two undefined sanitizer functions.
-* FIX: Corrected a cache-group typo and a timezone-unsafe date() call in the dashboard stats.
-* Removed the Font Awesome CDN dependency (cdnjs.cloudflare.com); icons now use the Bootstrap Icons set already bundled with the plugin.
-* Confirmed compatibility with WordPress 7.0 and WooCommerce 9.3.
-* Various code-quality and documentation improvements (WordPress Coding Standards compliance).
+* NEW: Added support for 2 custom notification sound slots.
+* NEW: Professional UI for managing custom notification sounds.
+* NEW: Unified multi-file upload for custom sounds.
+* NEW: Intelligent audio slot assignment (automatically fills empty slots).
+* IMPROVED: Auto-deletion of old audio files from the server when replaced.
+
 
 = 1.4.1 =
 * Updated plugin images and screenshots.
@@ -272,7 +280,8 @@ Yes. You will still receive the notification even if you are working in another 
 * Sound and popup notifications
 * Auto-refresh order table
 
-== Upgrade Notice ==
-
-= 1.4.2 =
-Security update: fixes a stored XSS in the new-order popup and adds missing capability checks on AJAX endpoints. Updating is recommended for all users.
+= 1.0.0 =
+* Initial release
+* Real-time order detection
+* Sound and popup notifications
+* Auto-refresh order table

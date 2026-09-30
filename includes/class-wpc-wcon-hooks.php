@@ -30,6 +30,7 @@ class WPC_WCON_Hooks {
 		add_action( 'admin_head', [ $this, 'wpc_global_bell_icon_customization' ] );
 
 		add_action( 'wp_ajax_wpc_get_dashboard_stats', [ $this, 'wpc_get_dashboard_stats' ] );
+		add_action( 'admin_init', [ $this, 'wpc_save_general_settings' ] );
 	}
 
 	/**
@@ -205,6 +206,8 @@ class WPC_WCON_Hooks {
 					'1' => WPC_WCON_URL . 'assets/audio/notification-1.wav',
 					'2' => WPC_WCON_URL . 'assets/audio/notification-2.wav',
 					'3' => WPC_WCON_URL . 'assets/audio/notification-3.wav',
+					'custom'  => ! empty( $stored_settings['custom_ringtone_url'] ) ? esc_url_raw( $stored_settings['custom_ringtone_url'] ) : '',
+					'custom2' => ! empty( $stored_settings['custom_ringtone_url_2'] ) ? esc_url_raw( $stored_settings['custom_ringtone_url_2'] ) : '',
 				],
 			]
 		);
@@ -407,6 +410,150 @@ class WPC_WCON_Hooks {
 		}
 
 		wp_send_json_error( [ 'message' => __( 'Failed to remove order', 'instant-order-notifier-woc' ) ] );
+	}
+
+	/**
+	 * Handle custom ringtone uploads and removals from the General Settings form.
+	 *
+	 * The other General Settings fields are saved by wpc_general_settings_page().
+	 * Uploads are limited to audio files (mp3, wav, ogg) of up to 2 MB and are
+	 * stored in the uploads folder so they survive plugin updates.
+	 */
+	public function wpc_save_general_settings() {
+		if ( ! isset( $_POST['wpc_save_settings'] ) ) {
+			return;
+		}
+
+		check_admin_referer( 'wpc_save_settings_nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to save these settings.', 'instant-order-notifier-woc' ) );
+		}
+
+		$settings = get_option( 'wpc_notification_settings', [] );
+		if ( ! is_array( $settings ) ) {
+			$settings = [];
+		}
+
+		$slots = [
+			'custom'  => [
+				'url_key' => 'custom_ringtone_url',
+				'remove'  => 'remove_custom_sound',
+			],
+			'custom2' => [
+				'url_key' => 'custom_ringtone_url_2',
+				'remove'  => 'remove_custom_sound_2',
+			],
+		];
+
+		foreach ( $slots as $ringtone => $slot ) {
+			if ( isset( $_POST[ $slot['remove'] ] ) && '1' === sanitize_text_field( wp_unslash( $_POST[ $slot['remove'] ] ) ) ) {
+				$this->wpc_delete_custom_ringtone( $settings[ $slot['url_key'] ] ?? '' );
+				unset( $settings[ $slot['url_key'] ] );
+				if ( ( $settings['ringtone'] ?? '' ) === $ringtone ) {
+					$settings['ringtone'] = '1';
+				}
+			}
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
+		if ( ! empty( $_FILES['custom_ringtones']['name'][0] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified above; each file is validated by wp_handle_upload().
+			$files = $_FILES['custom_ringtones'];
+			$count = min( 2, count( $files['name'] ) );
+
+			for ( $i = 0; $i < $count; $i++ ) {
+				if ( UPLOAD_ERR_OK !== $files['error'][ $i ] ) {
+					continue;
+				}
+
+				// One file goes to the selected slot (or slot 2 when slot 1 is taken); two files fill both.
+				if ( 1 === $count ) {
+					$use_second = 'custom2' === ( $settings['ringtone'] ?? '' )
+						|| ( ! empty( $settings['custom_ringtone_url'] ) && empty( $settings['custom_ringtone_url_2'] ) );
+				} else {
+					$use_second = 1 === $i;
+				}
+
+				$ringtone = $use_second ? 'custom2' : 'custom';
+				$url_key  = $slots[ $ringtone ]['url_key'];
+
+				$url = $this->wpc_store_custom_ringtone(
+					[
+						'name'     => $files['name'][ $i ],
+						'type'     => $files['type'][ $i ],
+						'tmp_name' => $files['tmp_name'][ $i ],
+						'error'    => $files['error'][ $i ],
+						'size'     => $files['size'][ $i ],
+					]
+				);
+
+				if ( '' === $url ) {
+					continue;
+				}
+
+				$this->wpc_delete_custom_ringtone( $settings[ $url_key ] ?? '' );
+				$settings[ $url_key ] = $url;
+				$settings['ringtone'] = $ringtone;
+			}
+		}
+
+		update_option( 'wpc_notification_settings', $settings, false );
+	}
+
+	/**
+	 * Validate an uploaded ringtone and move it into the plugin's uploads folder.
+	 *
+	 * @param array $file A single entry shaped like an item of $_FILES.
+	 * @return string URL of the stored file, or an empty string when rejected.
+	 */
+	private function wpc_store_custom_ringtone( $file ) {
+		if ( $file['size'] > 2 * MB_IN_BYTES ) {
+			return '';
+		}
+
+		$redirect = static function ( $dirs ) {
+			$dirs['subdir'] = '/instant-order-notifier-woc';
+			$dirs['path']   = $dirs['basedir'] . $dirs['subdir'];
+			$dirs['url']    = $dirs['baseurl'] . $dirs['subdir'];
+			return $dirs;
+		};
+
+		add_filter( 'upload_dir', $redirect );
+		$result = wp_handle_upload(
+			$file,
+			[
+				'test_form' => false,
+				'mimes'     => [
+					'mp3' => 'audio/mpeg',
+					'wav' => 'audio/wav|audio/x-wav',
+					'ogg' => 'audio/ogg',
+				],
+			]
+		);
+		remove_filter( 'upload_dir', $redirect );
+
+		return isset( $result['url'] ) ? esc_url_raw( $result['url'] ) : '';
+	}
+
+	/**
+	 * Delete a previously stored custom ringtone, only if it lives in this plugin's uploads folder.
+	 *
+	 * @param string $url URL saved in the settings.
+	 */
+	private function wpc_delete_custom_ringtone( $url ) {
+		if ( '' === $url ) {
+			return;
+		}
+
+		$uploads = wp_get_upload_dir();
+		$prefix  = trailingslashit( $uploads['baseurl'] ) . 'instant-order-notifier-woc/';
+
+		if ( 0 !== strpos( $url, $prefix ) ) {
+			return;
+		}
+
+		wp_delete_file( trailingslashit( $uploads['basedir'] ) . 'instant-order-notifier-woc/' . basename( $url ) );
 	}
 
 	/**
