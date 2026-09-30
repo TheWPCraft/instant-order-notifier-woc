@@ -526,7 +526,7 @@ class WPC_WCON_Hooks {
 				'test_form' => false,
 				'mimes'     => [
 					'mp3' => 'audio/mpeg',
-					'wav' => 'audio/wav|audio/x-wav',
+					'wav' => 'audio/wav',
 					'ogg' => 'audio/ogg',
 				],
 			]
