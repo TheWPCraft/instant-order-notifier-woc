@@ -27,6 +27,13 @@ class WPC_WCON_Hooks
 
         add_action('wp_ajax_wpc_get_dashboard_stats', [$this, 'wpc_get_dashboard_stats']);
         add_action('admin_init', [$this, 'wpc_save_general_settings']);
+
+        add_action('wp_ajax_wpc_get_workflow_queue', [$this, 'wpc_ajax_get_workflow_queue']);
+        add_action('wp_ajax_wpc_update_workflow_status', [$this, 'wpc_ajax_update_workflow_status']);
+        add_action('wp_ajax_wpc_get_next_order', [$this, 'wpc_ajax_get_next_order']);
+        add_action('wp_ajax_wpc_get_workflow_stats', [$this, 'wpc_ajax_get_workflow_stats']);
+        add_action('wp_ajax_wpc_bulk_update_workflow_status', [$this, 'wpc_ajax_bulk_update_workflow_status']);
+        add_action('wp_ajax_wpc_get_order_details', [$this, 'wpc_ajax_get_order_details']);
     }
 
     /**
@@ -162,6 +169,7 @@ class WPC_WCON_Hooks
     {
         $allowed_hooks = [
             'toplevel_page_woc-order-notification',
+            'order-notifier_page_woc-order-workflow',
             'order-notifier_page_woc-general-settings',
             'order-notifier_page_woc-advanced-settings',
             'order-notifier_page_woc-whatsapp-notification',
@@ -171,36 +179,168 @@ class WPC_WCON_Hooks
             return;
         }
 
-        wp_enqueue_style('bootstrap-css', WPC_WCON_URL . 'assets/bootstrap/css/bootstrap.min.css', [], '5.3.3');
-        wp_enqueue_style('bootstrap-icons', WPC_WCON_URL . 'assets/bootstrap/css/bootstrap-icons.min.css', [], '1.11.3');
-        wp_enqueue_style('fontawsome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css', [], '7.0.1');
-        wp_enqueue_style('wpc-admin-css', WPC_WCON_URL . 'assets/css/wpc-admin.css', [], '1.1');
+        // Bootstrap CSS
+        wp_enqueue_style(
+            'bootstrap-css',
+            WPC_WCON_URL . 'assets/bootstrap/css/bootstrap.min.css',
+            [],
+            '5.3.3'
+        );
 
-        wp_enqueue_script('wpc-admin-js', WPC_WCON_URL . 'assets/js/wpc-admin.js', ['jquery'], '1.1', true);
+        // Bootstrap Icons
+        wp_enqueue_style(
+            'bootstrap-icons',
+            WPC_WCON_URL . 'assets/bootstrap/css/bootstrap-icons.min.css',
+            [],
+            '1.11.3'
+        );
 
-        $settings = get_option('wpc_notification_settings', [
-            'notification_enabled' => '1',
-            'ringtone'             => '1',
-            'check_speed'          => 'normal',
-        ]);
+        // Font Awesome
+        wp_enqueue_style(
+            'fontawsome',
+            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css',
+            [],
+            '7.0.1'
+        );
 
-        wp_localize_script('wpc-admin-js', 'wpcData', [
-            'ajax_url'         => admin_url('admin-ajax.php'),
-            'audio'            => WPC_WCON_URL . 'assets/audio/notification-1.wav',
+        // Plugin Admin CSS
+        wp_enqueue_style(
+            'wpc-admin-css',
+            WPC_WCON_URL . 'assets/css/wpc-admin.css',
+            [],
+            '1.2'
+        );
+
+        // Plugin settings
+        $settings = get_option(
+            'wpc_notification_settings',
+            [
+                'notification_enabled' => '1',
+                'ringtone'             => '1',
+                'check_speed'          => 'normal',
+            ]
+        );
+
+        /*
+     * Common data for admin JS and workflow JS
+     */
+        $wpcData = [
+            'ajax_url'          => admin_url('admin-ajax.php'),
+            'audio'             => WPC_WCON_URL . 'assets/audio/notification-1.wav',
             'last_seen_order_id' => (int) get_option('wpc_last_seen_order_id', 0),
-            'nonce'            => wp_create_nonce('wpc_nonce'),
-            'settings'         => $settings,
-            'audio_urls'       => [
-                '1' => WPC_WCON_URL . 'assets/audio/notification-1.wav',
-                '2' => WPC_WCON_URL . 'assets/audio/notification-2.wav',
-                '3' => WPC_WCON_URL . 'assets/audio/notification-3.wav',
-                'custom' => !empty($settings['custom_ringtone_url']) ? $settings['custom_ringtone_url'] : '',
-                'custom2' => !empty($settings['custom_ringtone_url_2']) ? $settings['custom_ringtone_url_2'] : ''
-            ],
-        ]);
+            'nonce'             => wp_create_nonce('wpc_nonce'),
+            'settings'          => $settings,
 
-        wp_enqueue_script('bootstrap-js', WPC_WCON_URL . 'assets/bootstrap/js/bootstrap.min.js', [], '5.3.3', true);
+            'audio_urls' => [
+                '1'      => WPC_WCON_URL . 'assets/audio/notification-1.wav',
+                '2'      => WPC_WCON_URL . 'assets/audio/notification-2.wav',
+                '3'      => WPC_WCON_URL . 'assets/audio/notification-3.wav',
+                'custom' => !empty($settings['custom_ringtone_url'])
+                    ? $settings['custom_ringtone_url']
+                    : '',
+                'custom2' => !empty($settings['custom_ringtone_url_2'])
+                    ? $settings['custom_ringtone_url_2']
+                    : '',
+            ],
+        ];
+
+        /*
+     * Bootstrap JS
+     * Required on admin pages where plugin assets are loaded.
+     */
+        wp_enqueue_script(
+            'bootstrap-js',
+            WPC_WCON_URL . 'assets/bootstrap/js/bootstrap.min.js',
+            [],
+            '5.3.3',
+            true
+        );
+
+        /*
+     * Workflow assets
+     * Load ONLY on Workflow page.
+     */
+        $is_workflow_page = ('order-notifier_page_woc-order-workflow' === $hook);
+
+        if ($is_workflow_page) {
+
+            wp_enqueue_style(
+                'wpc-workflow-css',
+                WPC_WCON_URL . 'assets/css/wpc-workflow.css',
+                [],
+                '1.2'
+            );
+
+            wp_enqueue_script(
+                'wpc-workflow-js',
+                WPC_WCON_URL . 'assets/js/wpc-workflow.js',
+                ['jquery', 'bootstrap-js'],
+                '1.3',
+                true
+            );
+
+            /*
+         * Pass wpcData to workflow JS
+         */
+            wp_localize_script(
+                'wpc-workflow-js',
+                'wpcData',
+                $wpcData
+            );
+        }
+
+        /*
+     * Advanced Settings page
+     */
+        $is_advanced_page = ('order-notifier_page_woc-advanced-settings' === $hook);
+
+        if ($is_advanced_page && class_exists('WooCommerce')) {
+
+            wp_enqueue_style('woocommerce_admin_styles');
+
+            wp_enqueue_script('selectWoo');
+
+            wp_enqueue_style('select2');
+
+            wp_enqueue_script(
+                'wpc-advanced-settings-js',
+                WPC_WCON_URL . 'assets/js/wpc-advanced-settings.js',
+                ['jquery', 'selectWoo'],
+                '1.2',
+                true
+            );
+
+            wp_localize_script(
+                'wpc-advanced-settings-js',
+                'wpcAdvancedData',
+                [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce'    => wp_create_nonce('wpc_advanced_nonce'),
+                ]
+            );
+        }
+
+        /*
+     * Main Admin JS
+     */
+        wp_enqueue_script(
+            'wpc-admin-js',
+            WPC_WCON_URL . 'assets/js/wpc-admin.js',
+            ['jquery', 'bootstrap-js'],
+            '1.4',
+            true
+        );
+
+        /*
+     * Pass wpcData to main admin JS
+     */
+        wp_localize_script(
+            'wpc-admin-js',
+            'wpcData',
+            $wpcData
+        );
     }
+
 
     public function wpc_ajax_check_order()
     {
@@ -489,6 +629,284 @@ class WPC_WCON_Hooks
         }
 
         update_option('wpc_notification_settings', $settings);
+    }
+
+    public function wpc_ajax_get_workflow_queue()
+    {
+        check_ajax_referer('wpc_nonce', 'nonce');
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'woc_orders';
+
+        $is_pro = (function_exists('wpc_fs') && wpc_fs()->can_use_premium_code());
+        $status_filter = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : '';
+        $date_filter = isset($_POST['date_filter']) ? sanitize_text_field($_POST['date_filter']) : 'today';
+        $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+        $sort = isset($_POST['sort']) ? sanitize_text_field($_POST['sort']) : 'oldest';
+
+        $where = "workflow_status != 'completed'";
+
+        if ($date_filter === 'today') {
+            $today = current_time('Y-m-d');
+            $where .= $wpdb->prepare(" AND DATE(created_at) = %s", $today);
+        }
+
+        if ($status_filter === 'high_priority') {
+            $where .= " AND priority = 'high'";
+        } elseif (!empty($status_filter)) {
+            $where .= $wpdb->prepare(" AND workflow_status = %s", $status_filter);
+        }
+
+        if (!empty($search)) {
+            $where .= $wpdb->prepare(
+                " AND (order_id LIKE %s OR customer_name LIKE %s)",
+                '%' . $wpdb->esc_like($search) . '%',
+                '%' . $wpdb->esc_like($search) . '%'
+            );
+        }
+
+        $total_active = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE workflow_status != 'completed'");
+
+        // Ordering: Priority first, then age
+        $age_order = ($sort === 'newest') ? 'DESC' : 'ASC';
+        $order_by = "CASE
+        WHEN priority = 'high' THEN 1
+        WHEN priority = 'medium' THEN 2
+        ELSE 3 END ASC, created_at $age_order";
+
+        // LITE VERSION: limit = 5 (Pro માં 1000)
+        $limit = $is_pro ? 1000 : 5;
+
+        $orders = $wpdb->get_results("SELECT * FROM $table WHERE $where ORDER BY $order_by LIMIT $limit");
+
+        $data = [];
+        foreach ($orders as $o) {
+            $wc_order = wc_get_order($o->order_id);
+            $data[] = [
+                'id' => $o->order_id,
+                'customer_name' => $o->customer_name,
+                'total' => wc_price($o->total),
+                'status' => $o->status,
+                'workflow_status' => $o->workflow_status,
+                'priority' => $o->priority,
+                'created_at' => $o->created_at,
+                'human_time' => human_time_diff(strtotime($o->created_at), current_time('timestamp', true)) . ' ago',
+                'edit_url' => admin_url('post.php?post=' . $o->order_id . '&action=edit'),
+                'wc_status_label' => $wc_order ? wc_get_order_status_name($wc_order->get_status()) : $o->status
+            ];
+        }
+
+        wp_send_json_success([
+            'orders' => $data,
+            'total_active' => $total_active,
+            'is_pro' => $is_pro,
+            'limit' => $limit
+        ]);
+    }
+
+    public function wpc_ajax_update_workflow_status()
+    {
+        check_ajax_referer('wpc_nonce', 'nonce');
+        if (!current_user_can('manage_options')) wp_send_json_error();
+
+        $order_id = absint($_POST['order_id']);
+        $new_status = sanitize_text_field($_POST['workflow_status']);
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'woc_orders';
+
+        $wpdb->update($table, ['workflow_status' => $new_status], ['order_id' => $order_id]);
+
+        // Sync with WooCommerce status if workflow is 'completed'
+        if ($new_status === 'completed') {
+            $order = wc_get_order($order_id);
+            if ($order) {
+                $order->update_status('completed', __('Order completed via Workflow Queue.', 'instant-order-notifier-woc'));
+            }
+        }
+
+        wp_send_json_success(['next_status' => $new_status]);
+    }
+
+    public function wpc_ajax_get_next_order()
+    {
+        check_ajax_referer('wpc_nonce', 'nonce');
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'woc_orders';
+
+        $is_pro = (function_exists('wpc_fs') && wpc_fs()->can_use_premium_code());
+        $limit = $is_pro ? 1000 : 5;
+        $status_filter = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : '';
+        $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+        $sort = isset($_POST['sort']) ? sanitize_text_field($_POST['sort']) : 'newest';
+        $date_filter = isset($_POST['date_filter']) ? sanitize_text_field($_POST['date_filter']) : 'today';
+        $exclude_id = isset($_POST['exclude_id']) ? absint($_POST['exclude_id']) : 0;
+
+        // Same ordering logic as queue
+        $age_order = ($sort === 'newest') ? 'DESC' : 'ASC';
+        $order_by = "CASE
+            WHEN priority = 'high' THEN 1
+            WHEN priority = 'medium' THEN 2
+            ELSE 3 END ASC, created_at $age_order";
+
+        // Build where clause - matching the main queue logic
+        $where = "(workflow_status != 'completed'";
+        if ($exclude_id) {
+            $where .= $wpdb->prepare(" OR order_id = %d", $exclude_id);
+        }
+        $where .= ")";
+
+        if ($date_filter === 'today') {
+            $today = current_time('Y-m-d');
+            $where .= $wpdb->prepare(" AND DATE(created_at) = %s", $today);
+        }
+
+        if ($status_filter === 'high_priority') {
+            $where .= " AND priority = 'high'";
+        } elseif (!empty($status_filter)) {
+            $where .= $wpdb->prepare(" AND workflow_status = %s", $status_filter);
+        }
+
+        if (!empty($search)) {
+            $where .= $wpdb->prepare(
+                " AND (order_id LIKE %s OR customer_name LIKE %s)",
+                '%' . $wpdb->esc_like($search) . '%',
+                '%' . $wpdb->esc_like($search) . '%'
+            );
+        }
+
+        // Fetch all active IDs in current sort and filters
+        $all_ids = $wpdb->get_col("SELECT order_id FROM $table WHERE $where ORDER BY $order_by LIMIT $limit");
+
+        if (empty($all_ids)) {
+            wp_send_json_error(['message' => 'No orders left']);
+        }
+
+        $next_id = 0;
+        if ($exclude_id === 0) {
+            $next_id = $all_ids[0];
+        } else {
+            $current_index = array_search($exclude_id, $all_ids);
+            if ($current_index !== false && isset($all_ids[$current_index + 1])) {
+                $next_id = $all_ids[$current_index + 1];
+            }
+        }
+
+        if ($next_id) {
+            wp_send_json_success(['order_id' => $next_id]);
+        } else {
+            wp_send_json_error(['message' => 'No more orders in current queue']);
+        }
+    }
+
+    public function wpc_ajax_get_workflow_stats()
+    {
+        check_ajax_referer('wpc_nonce', 'nonce');
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'woc_orders';
+        $date_filter = isset($_POST['date_filter']) ? sanitize_text_field($_POST['date_filter']) : 'today';
+
+        $where = "1=1";
+        if ($date_filter === 'today') {
+            $today = current_time('Y-m-d');
+            $where = $wpdb->prepare("DATE(created_at) = %s", $today);
+        }
+
+        $stats = [
+            'new' => (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE workflow_status = 'new' AND $where"),
+            'need_attention' => (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE workflow_status = 'new' AND priority = 'high' AND $where"),
+            'processing' => (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE workflow_status = 'processing' AND $where"),
+            'ready' => (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE workflow_status = 'ready' AND $where"),
+            'total_active' => (int) $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE workflow_status != 'completed' AND $where"),
+        ];
+
+        wp_send_json_success($stats);
+    }
+
+    public function wpc_ajax_bulk_update_workflow_status()
+    {
+        check_ajax_referer('wpc_nonce', 'nonce');
+        if (!current_user_can('manage_options')) wp_send_json_error(['message' => 'Permission denied']);
+
+        $is_pro = (function_exists('wpc_fs') && wpc_fs()->can_use_premium_code());
+        if (!$is_pro) {
+            wp_send_json_error(['message' => 'Bulk actions are a Pro feature. Please upgrade to use this functionality.', 'pro_required' => true]);
+        }
+
+        $order_ids = isset($_POST['order_ids']) ? array_map('absint', (array) $_POST['order_ids']) : [];
+        $new_status = isset($_POST['workflow_status']) ? sanitize_text_field($_POST['workflow_status']) : '';
+
+        if (empty($order_ids) || empty($new_status)) {
+            wp_send_json_error(['message' => 'Missing data']);
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'woc_orders';
+
+        $placeholders = array_fill(0, count($order_ids), '%d');
+        $format = implode(',', $placeholders);
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $query = $wpdb->prepare("UPDATE $table SET workflow_status = %s WHERE order_id IN ($format)", array_merge([$new_status], $order_ids));
+        $wpdb->query($query);
+
+        // Sync with WooCommerce status for bulk 'completed'
+        if ($new_status === 'completed') {
+            foreach ($order_ids as $order_id) {
+                $order = wc_get_order($order_id);
+                if ($order) {
+                    $order->update_status('completed', __('Order completed via Bulk Workflow action.', 'instant-order-notifier-woc'));
+                }
+            }
+        }
+
+        wp_send_json_success(['message' => sprintf('%d orders updated.', count($order_ids))]);
+    }
+
+    public function wpc_ajax_get_order_details()
+    {
+        check_ajax_referer('wpc_nonce', 'nonce');
+        if (!current_user_can('manage_options')) wp_send_json_error(['message' => 'Permission denied']);
+
+        $order_id = absint($_POST['order_id']);
+        if (!$order_id) wp_send_json_error(['message' => 'Invalid order ID']);
+
+        $order = wc_get_order($order_id);
+        if (!$order) wp_send_json_error(['message' => 'Order not found']);
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'woc_orders';
+        $woc_order = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE order_id = %d", $order_id));
+
+        if (!$woc_order) wp_send_json_error(['message' => 'Order metadata not found']);
+
+        $items = [];
+        foreach ($order->get_items() as $item_id => $item) {
+            $items[] = [
+                'name'     => $item->get_name(),
+                'qty'      => $item->get_quantity(),
+                'subtotal' => wc_price($item->get_subtotal()),
+            ];
+        }
+
+        $data = [
+            'id'              => $order_id,
+            'customer_name'   => trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()),
+            'customer_email'  => $order->get_billing_email(),
+            'customer_phone'  => $order->get_billing_phone(),
+            'total'           => wc_price($order->get_total()),
+            'items'           => $items,
+            'status'          => $order->get_status(),
+            'wc_status_label' => wc_get_order_status_name($order->get_status()),
+            'workflow_status' => $woc_order->workflow_status,
+            'priority'        => $woc_order->priority,
+            'edit_url'        => admin_url('post.php?post=' . $order_id . '&action=edit'),
+            'date'            => date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($order->get_date_created()))
+        ];
+
+        wp_send_json_success($data);
     }
 
     public function wpc_get_dashboard_stats()

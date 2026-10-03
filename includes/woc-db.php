@@ -13,9 +13,13 @@ function wpc_create_order_table(){
         customer_name VARCHAR(200),
         total DECIMAL(10,2),
         status VARCHAR(50) DEFAULT 'processing',
+        workflow_status VARCHAR(20) DEFAULT 'new',
+        priority VARCHAR(10) DEFAULT 'normal',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
-        UNIQUE KEY order_id (order_id)
+        UNIQUE KEY order_id (order_id),
+        KEY workflow_status (workflow_status),
+        KEY priority (priority)
     ) $charset;";
 
     require_once ABSPATH.'wp-admin/includes/upgrade.php';

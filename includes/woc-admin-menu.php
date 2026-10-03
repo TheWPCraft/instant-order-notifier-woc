@@ -42,6 +42,15 @@ function wpc_add_admin_menu()
 
     add_submenu_page(
         'woc-order-notification',
+        'Order Workflow',
+        'Order Workflow',
+        'manage_options',
+        'woc-order-workflow',
+        'wpc_order_workflow_page'
+    );
+
+    add_submenu_page(
+        'woc-order-notification',
         'General Settings',
         'General Settings',
         'manage_options',
@@ -73,6 +82,13 @@ function wpc_recent_orders_page()
 {
     require_once WPC_WCON_PATH . 'includes/sidebar.php';
     require_once WPC_WCON_PATH . 'includes/pages/recent-orders.php';
+    require_once WPC_WCON_PATH . 'includes/pages/footer.php';
+}
+
+function wpc_order_workflow_page()
+{
+    require_once WPC_WCON_PATH . 'includes/sidebar.php';
+    require_once WPC_WCON_PATH . 'includes/pages/order-workflow.php';
     require_once WPC_WCON_PATH . 'includes/pages/footer.php';
 }
 function wpc_general_settings_page()
