@@ -1,0 +1,7 @@
+.git
+.gitattributes
+.gitignore
+.distignore
+.claude
+.github
+phpcs.xml.dist

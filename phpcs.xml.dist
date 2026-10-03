@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<ruleset name="Instant Order Notifier for WooCommerce">
+    <description>Coding standard for the Instant Order Notification for WooCommerce plugin.</description>
+
+    <file>.</file>
+
+    <exclude-pattern>*/assets/bootstrap/*</exclude-pattern>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+
+    <arg value="sp"/>
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+
+    <rule ref="WordPress">
+        <!-- Plugin requires PHP 7.4+; short array syntax is standard and preferred. -->
+        <exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+    </rule>
+
+    <config name="minimum_supported_wp_version" value="5.6"/>
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="instant-order-notifier-woc"/>
+            </property>
+        </properties>
+    </rule>
+
+    <rule ref="WordPress.Security.ValidatedSanitizedInput">
+        <properties>
+            <property name="customSanitizingFunctions" type="array">
+                <element value="wpc_normalize_e164_phone"/>
+                <element value="wpc_sanitize_e164_phone_setting"/>
+                <element value="wpc_sanitize_whatsapp_recipients_setting"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>
