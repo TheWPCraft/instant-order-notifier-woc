@@ -324,17 +324,9 @@ input[type="radio"]:focus {
 .form-switch .form-check-input {
   background-repeat: no-repeat;
 }
-.form-check input[type="radio"].form-check-input {
-  position: relative;
-}
-input[type="radio"]:checked::before {
-  background-color: #fff;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
+.form-check-input[type="radio"]::before {
+  display: none !important;
+  content: none !important;
 }
 .general-settings-main .card {
   background-color: #f9f9f9;

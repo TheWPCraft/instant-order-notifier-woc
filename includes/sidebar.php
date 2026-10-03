@@ -18,12 +18,14 @@ if ( function_exists( 'get_current_screen' ) ) {
 	}
 }
 
-$is_recent   = ( strpos( $current_page, 'woc-order-notification' ) !== false );
+$is_recent   = ( strpos( $current_page, 'woc-order-notification' ) !== false && strpos( $current_page, 'woc-order-workflow' ) === false );
+$is_workflow = ( strpos( $current_page, 'woc-order-workflow' ) !== false );
 $is_settings = ( strpos( $current_page, 'woc-general-settings' ) !== false );
 $is_advanced = ( strpos( $current_page, 'woc-advanced-settings' ) !== false );
 $is_whatsapp = ( strpos( $current_page, 'woc-whatsapp-notification' ) !== false );
 
 $recent_orders_url     = esc_url( admin_url( 'admin.php?page=woc-order-notification' ) );
+$workflow_orders_url   = esc_url( admin_url( 'admin.php?page=woc-order-workflow' ) );
 $general_settings_url  = esc_url( admin_url( 'admin.php?page=woc-general-settings' ) );
 $advanced_settings_url = esc_url( admin_url( 'admin.php?page=woc-advanced-settings' ) );
 $whatsapp_settings_url = esc_url( admin_url( 'admin.php?page=woc-whatsapp-notification' ) );
@@ -56,6 +58,10 @@ $whatsapp_settings_url = esc_url( admin_url( 'admin.php?page=woc-whatsapp-notifi
 						<a class="nav-link mb-3 rounded <?php echo $is_recent ? 'active' : ''; ?>"
 							href="<?php echo esc_url( $recent_orders_url ); ?>">
 							<span><?php esc_html_e( 'Recent Orders', 'instant-order-notifier-woc' ); ?></span>
+						</a>
+						<a class="nav-link mb-3 rounded <?php echo $is_workflow ? 'active' : ''; ?>"
+							href="<?php echo esc_url( $workflow_orders_url ); ?>">
+							<span><?php esc_html_e( 'Order Workflow', 'instant-order-notifier-woc' ); ?></span>
 						</a>
 						<span class="nav-link-main-text"> <?php esc_html_e( 'settings', 'instant-order-notifier-woc' ); ?> </span>
 						<a class="nav-link mb-2 rounded <?php echo $is_settings ? 'active' : ''; ?>"
