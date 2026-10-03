@@ -2,9 +2,9 @@
 Contributors: thewpcraft
 Tags: order notification, order alert, woocommerce notification
 Requires at least: 5.6
-Tested up to: 6.9
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.2
+Stable tag: 5.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 WC requires at least: 7.0
@@ -212,6 +212,16 @@ Yes. You will still receive the notification even if you are working in another 
 
 == Changelog ==
 
+= 5.1.0 =
+* NEW: Order Workflow Queue – Dedicated high-speed dashboard for faster order processing.
+* NEW: Quick Process Modal – View order details and update order status without page reloads.
+* NEW: Smart "Next Order" Navigation – Automatically move to the next pending order for uninterrupted processing.
+* NEW: Today's Orders View – Quickly focus on orders received today with a dedicated daily operations view.
+* IMPROVED: Real-time Order Status Sync – Keeps workflow status and WooCommerce order status synchronized.
+* IMPROVED: Workflow Dashboard UI – Refined statistics, navigation, and overall user experience.
+* IMPROVED: Faster Order Processing – Optimized workflow interactions for smoother day-to-day operations.
+* COMPATIBILITY: Tested up to WordPress 7.1.0.
+
 = 1.4.2 =
 * NEW: Added support for 2 custom notification sound slots.
 * NEW: Professional UI for managing custom notification sounds.
@@ -273,12 +283,6 @@ Yes. You will still receive the notification even if you are working in another 
 * Layout and styling updates
 * Improved responsiveness for mobile and tablet
 * Minor bug fixes and performance enhancements
-
-= 1.0.0 =
-* Initial release
-* Real-time order detection
-* Sound and popup notifications
-* Auto-refresh order table
 
 = 1.0.0 =
 * Initial release
