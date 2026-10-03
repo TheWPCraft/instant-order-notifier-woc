@@ -13,6 +13,10 @@ if (!defined('ABSPATH')) {
         <div class="pro-text">
             <h5>Available in Pro Version</h5>
             <p>Upgrade to unlock all premium features.</p>
+            <ul>
+                <li>Get 10% OFF on Instant Order Notification for WooCommerce Pro.</li>
+                <li>Use Coupon: <strong>THEWPCRAFT10</strong></li>
+            </ul>
         </div>
         <div class="pro-btn w-100">
             <a href="https://thewpcraft.com/plugins-details/instant-order-notification" target="_blank"
@@ -43,7 +47,8 @@ if (!defined('ABSPATH')) {
                 <div class="card mb-3">
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="card-title mb-1"><?php esc_html_e('Enable Rules', 'instant-order-notifier-woc'); ?></h6>
+                            <h6 class="card-title mb-1">
+                                <?php esc_html_e('Enable Rules', 'instant-order-notifier-woc'); ?></h6>
                             <p class="text-muted mb-0 small">
                                 <?php esc_html_e('When disabled, notifications behave as before without rule filtering.', 'instant-order-notifier-woc'); ?>
                             </p>
@@ -55,7 +60,8 @@ if (!defined('ABSPATH')) {
                     </div>
                 </div>
 
-                <div id="wpc-rules-sections" class="<?php echo '1' !== $rules['enabled'] ? 'wpc-rules-disabled' : ''; ?>">
+                <div id="wpc-rules-sections"
+                    class="<?php echo '1' !== $rules['enabled'] ? 'wpc-rules-disabled' : ''; ?>">
 
                     <!-- Product Filters -->
                     <div class="card mb-3">
@@ -72,9 +78,10 @@ if (!defined('ABSPATH')) {
                                     <label class="form-label" for="included_products">
                                         <?php esc_html_e('Products Included', 'instant-order-notifier-woc'); ?>
                                     </label>
-                                    <select class="wpc-select2 form-control" id="included_products" name="included_products[]"
-                                        multiple="multiple" data-type="products" data-placeholder="<?php esc_attr_e('Search products…', 'instant-order-notifier-woc'); ?>">
-                                        <?php foreach ($product_options as $opt) : ?>
+                                    <select class="wpc-select2 form-control" id="included_products"
+                                        name="included_products[]" multiple="multiple" data-type="products"
+                                        data-placeholder="<?php esc_attr_e('Search products…', 'instant-order-notifier-woc'); ?>">
+                                        <?php foreach ($product_options as $opt): ?>
                                             <option value="<?php echo esc_attr($opt['id']); ?>" selected="selected">
                                                 <?php echo esc_html($opt['text']); ?>
                                             </option>
@@ -85,9 +92,10 @@ if (!defined('ABSPATH')) {
                                     <label class="form-label" for="included_categories">
                                         <?php esc_html_e('Product Categories Included', 'instant-order-notifier-woc'); ?>
                                     </label>
-                                    <select class="wpc-select2 form-control" id="included_categories" name="included_categories[]"
-                                        multiple="multiple" data-type="categories" data-placeholder="<?php esc_attr_e('Search categories…', 'instant-order-notifier-woc'); ?>">
-                                        <?php foreach ($category_options as $opt) : ?>
+                                    <select class="wpc-select2 form-control" id="included_categories"
+                                        name="included_categories[]" multiple="multiple" data-type="categories"
+                                        data-placeholder="<?php esc_attr_e('Search categories…', 'instant-order-notifier-woc'); ?>">
+                                        <?php foreach ($category_options as $opt): ?>
                                             <option value="<?php echo esc_attr($opt['id']); ?>" selected="selected">
                                                 <?php echo esc_html($opt['text']); ?>
                                             </option>
@@ -99,8 +107,9 @@ if (!defined('ABSPATH')) {
                                         <?php esc_html_e('Product Tags Included', 'instant-order-notifier-woc'); ?>
                                     </label>
                                     <select class="wpc-select2 form-control" id="included_tags" name="included_tags[]"
-                                        multiple="multiple" data-type="tags" data-placeholder="<?php esc_attr_e('Search tags…', 'instant-order-notifier-woc'); ?>">
-                                        <?php foreach ($tag_options as $opt) : ?>
+                                        multiple="multiple" data-type="tags"
+                                        data-placeholder="<?php esc_attr_e('Search tags…', 'instant-order-notifier-woc'); ?>">
+                                        <?php foreach ($tag_options as $opt): ?>
                                             <option value="<?php echo esc_attr($opt['id']); ?>" selected="selected">
                                                 <?php echo esc_html($opt['text']); ?>
                                             </option>
@@ -114,7 +123,8 @@ if (!defined('ABSPATH')) {
                     <!-- Minimum Order Amount -->
                     <div class="card mb-3">
                         <div class="card-header bg-transparent">
-                            <h6 class="mb-0"><?php esc_html_e('Minimum Order Amount', 'instant-order-notifier-woc'); ?></h6>
+                            <h6 class="mb-0"><?php esc_html_e('Minimum Order Amount', 'instant-order-notifier-woc'); ?>
+                            </h6>
                         </div>
                         <hr class="my-0">
                         <div class="card-body">
@@ -124,7 +134,8 @@ if (!defined('ABSPATH')) {
                                         <?php esc_html_e('Minimum total', 'instant-order-notifier-woc'); ?>
                                     </label>
                                     <div class="input-group">
-                                        <span class="input-group-text"><?php echo esc_html(get_woocommerce_currency_symbol()); ?></span>
+                                        <span
+                                            class="input-group-text"><?php echo esc_html(get_woocommerce_currency_symbol()); ?></span>
                                         <input type="number" class="form-control" id="minimum_order_amount"
                                             name="minimum_order_amount" step="0.01" min="0"
                                             value="<?php echo esc_attr($rules['minimum_order_amount']); ?>"

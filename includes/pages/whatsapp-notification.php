@@ -13,6 +13,10 @@ if (!defined('ABSPATH')) {
         <div class="pro-text">
             <h5>Available in Pro Version</h5>
             <p>Upgrade to unlock all premium features.</p>
+            <ul>
+                <li>Get 10% OFF on Instant Order Notification for WooCommerce Pro.</li>
+                <li>Use Coupon: <strong>THEWPCRAFT10</strong></li>
+            </ul>
         </div>
         <div class="pro-btn w-100">
             <a href="https://thewpcraft.com/plugins-details/instant-order-notification" target="_blank"
