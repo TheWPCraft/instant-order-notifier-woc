@@ -469,6 +469,8 @@ class WPC_WCON_Hooks {
 			}
 		}
 
+		$uploaded = false;
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 		if ( ! empty( $_FILES['custom_ringtones']['name'][0] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified above; each file is validated by wp_handle_upload().
@@ -508,10 +510,19 @@ class WPC_WCON_Hooks {
 				$this->wpc_delete_custom_ringtone( $settings[ $url_key ] ?? '' );
 				$settings[ $url_key ] = $url;
 				$settings['ringtone'] = $ringtone;
+				$uploaded             = true;
 			}
 		}
 
 		update_option( 'wpc_notification_settings', $settings, false );
+
+		if ( $uploaded ) {
+			/**
+			 * Fires when a custom ringtone was uploaded and selected during this request,
+			 * so the General Settings page keeps that selection instead of the submitted radio.
+			 */
+			do_action( 'wpc_custom_ringtone_uploaded' );
+		}
 	}
 
 	/**

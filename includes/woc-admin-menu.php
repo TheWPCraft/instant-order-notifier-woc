@@ -175,6 +175,16 @@ function wpc_general_settings_page() {
 			$existing = [];
 		}
 
+		// A custom sound uploaded in this request already chose its own ringtone.
+		if ( did_action( 'wpc_custom_ringtone_uploaded' ) ) {
+			$ringtone = isset( $existing['ringtone'] ) ? $existing['ringtone'] : '1';
+		} elseif ( 'custom' === $ringtone && empty( $existing['custom_ringtone_url'] ) ) {
+			// The selected custom sound no longer exists (e.g. it was just removed).
+			$ringtone = '1';
+		} elseif ( 'custom2' === $ringtone && empty( $existing['custom_ringtone_url_2'] ) ) {
+			$ringtone = '1';
+		}
+
 		// General only — WhatsApp / Twilio keys stay on Advanced Settings page.
 		$options = array_merge(
 			$existing,
