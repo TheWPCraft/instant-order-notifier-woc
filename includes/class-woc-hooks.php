@@ -571,6 +571,8 @@ class WPC_WCON_Hooks
             return;
         }
 
+        $uploaded = false;
+
         // ==================== UPLOAD CUSTOM SOUNDS (Single Multiple Input) ====================
         if (!empty($_FILES['custom_ringtones']['name'][0])) {
             $files = $_FILES['custom_ringtones'];
@@ -599,6 +601,7 @@ class WPC_WCON_Hooks
                     if (move_uploaded_file($files['tmp_name'][$i], $audio_dir . $filename)) {
                         $settings[$slot_key] = WPC_WCON_URL . 'assets/audio/' . $filename;
                         $settings['ringtone'] = $ringtone_val;
+                        $uploaded = true;
                     }
                 }
             } else {
@@ -623,12 +626,21 @@ class WPC_WCON_Hooks
                     if (move_uploaded_file($files['tmp_name'][0], $audio_dir . $filename)) {
                         $settings[$target_slot] = WPC_WCON_URL . 'assets/audio/' . $filename;
                         $settings['ringtone'] = $target_ringtone;
+                        $uploaded = true;
                     }
                 }
             }
         }
 
         update_option('wpc_notification_settings', $settings);
+
+        if ($uploaded) {
+            /**
+             * Fires when a custom ringtone was uploaded and selected during this request,
+             * so the General Settings page keeps that selection instead of the submitted radio.
+             */
+            do_action('wpc_custom_ringtone_uploaded');
+        }
     }
 
     public function wpc_ajax_get_workflow_queue()
